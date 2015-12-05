@@ -1,0 +1,19 @@
+{
+  "name": "votegrity",
+  "version": "1.0.0",
+  "description": "Simple voting system with untrusted server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "voting",
+    "cryptography"
+  ],
+  "author": "Vasily Kuznetsov",
+  "license": "MIT",
+  "dependencies": {
+    "jsencrypt": "=2.1.0",
+    "jshashes": "=1.0.5"
+  }
+}
