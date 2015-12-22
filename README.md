@@ -177,18 +177,46 @@ of the generated key pair will not match the published public key.
 
 We use cryptico API for encryption and signing.
 
+#### Server side storage (a.k.a. key-value store)
+
+The server can store and retrieve some data for the clients.
+The storage is implemented as a simple key-value store.
+Its API is implemented on top of HTTP(S) POST requests
+and request parameters are encoded in the POST body.
+This is simpler than using a proper REST-API,
+which would expose us to caching issues
+and require proper authentication and sessions.
+
+The API has two calls:
+ 
+* ``read(key, accessToken)`` -- Returns the content of the store bucket
+  associated with the key.
+
+* ``write (key, accessToken, content)`` -- Replaces the content of the bucket
+  associated with the key with provided content.
+  Returns success code.
+
+Both calls check the access token and return error responses
+if the token does not allow access to the bucket.
+
+The data is stored on the disk in one folder with files
+and the access is synchronised by the server (only one write at a time,
+reads only if there's no write).
+
+Access is controlled via the access token table and the ACL,
+which are stored in two buckets. There are three access levels:
+
+* ``read`` -- Allows reading the content,
+* ``write`` -- Allows writing the content,
+* ``write-once(<timestamp>)`` -- Allows writing as long as
+  time of last modification of the bucket is before given timestamp.
+
 ### Architecture
 
 #### Server
 
-We use a minimal server based on node.js that provides a key-value storage.
-Read and write access to keys or key prefixes
-is guarded by moderator and counter passwords
-or individual authentication tokens.
-The access map is stored in the same storage at the "access" key.
-It's R/W for moderator.
-
-There's also a number of static pages that can include some of the buckets
+We use a minimal server based on node.js that provides the key-value store
+and a number of static pages that can include some of the values
 and contain the code and templates of the client.
 
 In production the server is reverse-proxied with nginx or apache that
@@ -200,3 +228,5 @@ There are client applications for moderator, counter and voter.
 Each of them is a single page web app that includes cryptico library
 and common base library that performs necessary cryptographic tasks
 and talks to the server.
+
+### 
