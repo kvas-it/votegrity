@@ -181,7 +181,7 @@ We use cryptico API for encryption and signing.
 
 #### Server
 
-We use a minimal server that provides a key-value storage.
+We use a minimal server based on node.js that provides a key-value storage.
 Read and write access to keys or key prefixes
 is guarded by moderator and counter passwords
 or individual authentication tokens.
@@ -190,6 +190,9 @@ It's R/W for moderator.
 
 There's also a number of static pages that can include some of the buckets
 and contain the code and templates of the client.
+
+In production the server is reverse-proxied with nginx or apache that
+can serve static files and provide HTTPS-termination.
 
 #### Client
 
