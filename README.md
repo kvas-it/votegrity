@@ -84,7 +84,7 @@ N denotes the number of voters.
    signs the list and publishes it on the server.
 4. Counter generates N ballot tokens, uses them to create empty ballots,
    signs each ballot, encrypts it with moderator's public key and
-   publishes all ballots to the server.
+   publishes all ballots on the server.
 5. Moderator decrypts the ballots, generates the mapping of voters
    to ballots, encrypts it with his public key and stores on the server.
 6. Moderator sends one ballot to each voter via e-mail
@@ -150,7 +150,50 @@ which should be a sufficient deterrent against
 authenticity breaching by the administrators.
 All in all the compromise seems to be acceptable.
 
-### Implementation
+## Implementation
 
-This section will explain the technical details of implementing the voting procedure
-as an IT system.
+### Dependencies
+
+* [cryptico](https://github.com/wwwtyro/cryptico)
+  for encryption, signing, hashes, RNG and key generation.
+
+### Foundations
+
+#### Tokens
+
+We use 256-bit random strings whenever we need random tokens. We encode them
+with BASE64 to make ASCII-safe and human-readable (this produces 44-character strings).
+
+#### Key generation
+
+We use cryptico for generating key pairs from passwords
+instead of randomly generating key pairs.
+To ensure adequate level of security we use random tokens for passwords
+and don't allow users to choose them. The added benefit is that if a wrong password
+is entered later it will be immediately detected because the public key
+of the generated key pair will not match the published public key.
+
+#### Encryption
+
+We use cryptico API for encryption and signing.
+
+### Architecture
+
+#### Server
+
+We use a minimal server that provides a key-value storage.
+Read and write access to keys or key prefixes
+is guarded by moderator and counter passwords
+or individual authentication tokens.
+The access map is stored in the same storage at the "access" key.
+It's R/W for moderator.
+
+There's also a number of static pages that can include some of the buckets
+and contain the code and templates of the client.
+
+#### Client
+
+There are client applications for moderator, counter and voter.
+Each of them is a single page web app that includes cryptico library
+and common base library that performs necessary cryptographic tasks
+and talks to the server.
