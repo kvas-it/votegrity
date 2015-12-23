@@ -1,6 +1,6 @@
 # Votegrity
 
-[![Build Status][travis-image]][travis-url]
+[![Build Status](https://travis-ci.org/kvas-it/votegrity.svg?branch=master)](https://travis-ci.org/kvas-it/votegrity)
 
 Votegrity is a web-based electronic voting system
 that automates voting by secret ballot
