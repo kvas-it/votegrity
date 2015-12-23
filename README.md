@@ -1,28 +1,30 @@
 # Votegrity
 
-Votegrity is a web-based voting system
-that automates multiple choice voting by secret ballot
-in a way that no single person can compromise the voting process
-(in particular there's no need to trust the administrators of the e-mail system).
+Votegrity is a web-based electronic voting system
+that automates voting by secret ballot
+in a way that no single person can compromise the voting process.
 
 There are three properties of the voting process that votegrity ensures
 (together we'll call them **integrity**):
 
-1. **Secrecy**: nobody except for the voter knows how he/she voted
+1. **Secrecy**: nobody except for the voter knows if and how he/she voted
    unless the voter explicitly allows this information to be disclosed.
 
 2. **Transparency** that consists of three parts:
     * Every voter can see how his/her ballot was counted,
-    * Everyone sees the list of all voters,
-    * Everyone sees the list of all votes
-      (but doesn't see who case which vote because this would violate secrecy).
+    * Everyone sees the list of all eligible voters,
+    * Everyone sees the list of all cast votes
+      (but doesn't see who cast which vote because this would violate secrecy).
 
-3. **Authenticity**: all votes in the final count are cast by one of the voters.
+3. **Authenticity**: all votes in the final count are cast by one of the eligible voters,
+   not more than one vote per voter.
 
 Votegrity uses cryptography
 and distributes responsibilities between two administrators
 in such a way that integrity will hold
-unless they conspire to defeat the system.
+unless the two administrators conspire to defeat the system
+
+Note: _Administrators of the e-mail system can also conspire with the counter_.
 
 ## Conceptual outline
 
@@ -43,10 +45,11 @@ without going much into technical detail.
   that can be used encryption and signing.
 * **Token** is sufficiently long string of numbers that it cannot be
   guessed.
-* **Ballot** is a data structure containing a ballot token and
-  the list of voting options.
+* **Ballot** is a data structure containing a ballot token issued by the counter
+  and the list of voting options.
 * **Filled ballot** is a ballot plus voter token and the vote
   (selection from the list of voting options).
+  The vote and the voter token are encrypted with the public key of the counter.
 
 ### Assumptions
 
@@ -58,21 +61,24 @@ The security of the system rests on the following assumptions:
    it's possible to produce the signature of the data using the private key 
    so that it can be verified using the public key
    and cannot be produced without the private key.
-3. Moderator and counter don't conspire to defeat the system.
-4. Users can trust the integrity of the client
+3. When tokens are generated in the process it's not possible
+   for anyone to predict which string was generated.
+4. Moderator and counter don't conspire to defeat the system.
+5. E-mail administrators and the counter don't conspire to defeat the system.
+6. Users can trust the integrity of the client
    (even though it's delivered to the browser by the server,
    it's unobfuscated javascript so it can be inspected
    and verified to be authentic; we try to make such inspection as
    simple as possible).
-5. When tokens are generated in the process it's not possible
-   for anyone to predict which string was generated.
 
 ### Voting procedure
 
 The list below outlines the steps of the voting procedure.
 We will use "he" instead of "he/she" for brevity.
-Whenever anything is published on the server
+Whenever anything is _published_ on the server
 it becomes available to all participants of the process.
+When something is _stored_ on the server, it becomes available
+to the moderator and other parties if specified.
 N denotes the number of voters.
 
 1. Moderator uses the client to generate a key pair. He stores the
@@ -83,31 +89,71 @@ N denotes the number of voters.
    matches encrypted tokens with names of voters,
    signs the list and publishes it on the server.
 4. Counter generates N ballot tokens, uses them to create empty ballots,
-   signs each ballot, encrypts it with moderator's public key and
-   publishes all ballots on the server.
-5. Moderator decrypts the ballots, generates the mapping of voters
-   to ballots, encrypts it with his public key and stores on the server.
-6. Moderator sends one ballot to each voter via e-mail
-   in accordance with the mapping
-   together with their authentication token (decrypted);
-   the whole bundle is signed.
-7. The voter enters the information into the client,
-   the client checks signatures of counter and moderator
-   and that authentication token is one of the valid tokens
-   on the list (encrypt it with moderator's public key, compare),
+   signs each ballot and publishes all ballots on the server.
+5. Moderator generates the mapping of authentication tokens to ballots
+   and stores each ballot on the server
+   protected by its respective authentication token.
+6. Moderator sends one authentication token to each voter via e-mail
+   in accordance with the list from step 3.
+7. The voter enters his authentication token into the client,
+   the client checks that the token is one of the tokens from the list,
+   retrieves the ballot from the server,
+   checks that it's one of the ballots from the list,
    the voter enters his vote into the client,
    the voter generates voter token using the client and stores it securely,
-   filled ballot is produced,
-   filled ballot is encrypted with the public key of the counter,
-   encrypted filled ballot is submitted to the server
-   together with authentication token.
-8. The server checks the authentication token,
-   updates the voter list marking the voter as "voted" and
-   stores the filled ballot
-   (it's still encrypted with the public key of the counter).
-9. After the election is over the counter receives and decrypts all filled ballots
+   filled ballot is produced and stored on the server.
+8. The server checks the correctness of filled ballot,
+   updates the used ballot token list marking the ballot token "used".
+9. After the election is over the moderator collects all used ballots
+   and publishes them on the server signing the whole package.
+10. The counter receives the filled ballots
    and publishes signed list of voter tokens with the corresponding votes
    and the final results.
+
+The following scheme illustrates the flow of information during the steps:
+
+	      Counter             Moderator            Server             Voter
+	
+	3.                SM([EM(AT[i]) + V[i]]) -----> <P>
+
+    4.   SC([B[i]]) ------------------------------> <P>
+
+    5.                         [ B[i] ----------> <AT[i]> ]
+
+    6.                          AT[i] ---------- e-mail --------------> *
+  
+    7.                                               * <------------- AT[i]
+                                                    B[i] -------------> *
+                                                     * <------------- FB[i]
+
+    8.                                       BT[i]+"used" -> <P>
+
+    9.                           [ * <------------- FB[i] ]
+                              SM([FB[i]]) --------> <P>
+ 
+    10.  SM([FB[i]]) <------------------------------ *
+       [VT[i] + VV[i]] ---------------------------> <P>
+
+Notation:
+
+* Data
+  * ``AT[i]`` -- Authentication token,
+  * ``V[i]`` -- Voter information of one voter,
+  * ``VT[i]`` -- Voter token,
+  * ``VV[i]`` -- Vote,
+  * ``B[i]`` -- Ballot (consisting of a ballot token and information about voting),
+  * ``FB[i]`` -- Filled ballot (``B[i] + SC(VT[i] + VV[i])``),
+  * ``[X[i]]`` -- the full list of Xs (e.g. all authentication tokens),
+* Encryption and signatures:
+  * ``SM(...)`` -- Information signed by moderator,
+  * ``EM(...)`` -- Information encrypted with moderator's public key,
+  * ``SC(...)`` -- Information signed by counter,
+  * ``EC(...)`` -- Information encrypted with counter's public key,
+* Storage on the server:
+  * ``<P>`` -- Information is publicly accessible,
+  * ``<AT[i]>`` -- Information is accessible to those who posses.
+  * The storing operations are denoted with arrows,
+  * Storing operations in square brackets denote storage of all items of the kind.
 
 ### Analysis
 
@@ -117,9 +163,12 @@ Secrecy is preserved because only the voter and the counter can see the content
 of a filled ballot. However, the counter has no way to know which ballot belongs
 to whom. The mapping of ballots to voters is only known to the moderator and
 the only information inside of the filled ballot that is associated with the voter
-is the voter token that is only known to the voter. It's also not possible to match
-voters to filled ballots by timing because filled ballots become available
-to the counter all at once at the end of election. 
+is the voter token that is only known to the voter.
+
+The moderator knows who voted and who didn't,
+so this part of the information has a weaker secrecy than the vote itself.
+We need to have the possibility to cast an empty ballot
+for the voters who want more privacy with the question of whether they voted or not.
 
 #### Transparency
 
@@ -134,11 +183,13 @@ All the votes cast can be seen by everyone after step 9.
 
 There are two options for violating authenticity:
 adding an extra vote and modifying a vote cast by one of the voters.
-First one is not possible because the number of the votes is visible
+First one is not possible because the number of the votes cast is visible
 during and after the election
-and each voter can check if he/she is counted as voted.
+and each voter can check if the ballot that they received was used.
 Second is not possible because the voter whose vote was changed would see the
 change in the final results.
+
+A voter can only cast one vote because they have only one ballot available to them.
 
 We're relying on voters here to prevent vote injection and falsification,
 and one could argue that this is not a very reliable option.
@@ -228,5 +279,3 @@ There are client applications for moderator, counter and voter.
 Each of them is a single page web app that includes cryptico library
 and common base library that performs necessary cryptographic tasks
 and talks to the server.
-
-### 
