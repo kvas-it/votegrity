@@ -1,8 +1,13 @@
-.PHONY: clean install checksum syntaxcheck
+.PHONY: clean install checksum syntaxcheck test
 
-BOWER=node_modules/bower/bin/bower
-JSCS=node_modules/jscs/bin/jscs
-JSHINT=node_modules/jshint/bin/jshint
+NPMBIN=node_modules/.bin
+
+BOWER=${NPMBIN}/bower
+JSCS=${NPMBIN}/jscs
+JSHINT=${NPMBIN}/jshint
+MOCHA=${NPMBIN}/mocha
+
+SOURCES=server client/js tests
 
 install:
 	npm install
@@ -16,5 +21,9 @@ checksum:
 	shasum -c shasums.txt
 
 syntaxcheck:
-	${JSHINT} server client/js
-	${JSCS} server client/js
+	${JSHINT} ${SOURCES}
+	${JSCS} ${SOURCES}
+
+test:
+	${MOCHA} tests
+	make syntaxcheck
