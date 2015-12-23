@@ -31,5 +31,8 @@
     },
     "esnext": true
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jscs": "^2.7.0",
+    "jshint": "^2.8.0"
+  }
 }

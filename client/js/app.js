@@ -9,8 +9,8 @@ function helloWorld() {
         return 'Cryptico not found.';
     }
 
-    var password = 'Ash nazg thrakatuluk agh burzum-ishi krimpatul'; 
-    var bits = 2048;
+    var password = 'Ash nazg thrakatuluk agh burzum-ishi krimpatul';
+    var bits = 512;
 
     var key = cryptico.generateRSAKey(password, bits);
     var keyString = cryptico.publicKeyString(key);
@@ -24,3 +24,5 @@ function helloWorld() {
 
     return cryptico.decrypt(cipherText, key).plaintext;
 }
+
+window.helloWorld = helloWorld;
