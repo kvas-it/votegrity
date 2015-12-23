@@ -73,7 +73,19 @@ The security of the system rests on the following assumptions:
 
 ### Voting procedure
 
-The list below outlines the steps of the voting procedure.
+The basic idea behind the voting procedure is as follows:
+
+* Counter issues ballots,
+* Moderator distributes them to the voters, one to each,
+* Voters submit filled ballots to the moderator
+  with the vote readable only by the counter,
+* The moderator passes all the filled ballots to the counter
+  who calculates and publishes the results.
+
+Below we outline the procedure in more detail
+explaining which information is exchanged at each step.
+The analysis will follow.
+
 We will use "he" instead of "he/she" for brevity.
 Whenever anything is _published_ on the server
 it becomes available to all participants of the process.
