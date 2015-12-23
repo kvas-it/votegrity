@@ -1,5 +1,7 @@
 # Votegrity
 
+[![Build Status][travis-image]][travis-url]
+
 Votegrity is a web-based electronic voting system
 that automates voting by secret ballot
 in a way that no single person can compromise the voting process.
