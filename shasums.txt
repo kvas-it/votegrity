@@ -1,1 +1,2 @@
 c1435235e2a297d3656e0409939f9f118b5d19a0  node_modules/cryptico/lib/cryptico.js
+4393480e210ea155210ee56d7b626f9bda9198ae  bower_components/cryptico/cryptico.js

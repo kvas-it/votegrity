@@ -13,7 +13,7 @@ var routes = require('./routes');
 var app = express();
 
 app.set('clientRoot', path.normalize(__dirname + '/../client'));
-app.set('modulesRoot', path.normalize(__dirname + '/../node_modules'));
+app.set('componentsRoot', path.normalize(__dirname + '/../bower_components'));
 app.use(morgan('dev'));
 
 routes.install(app);

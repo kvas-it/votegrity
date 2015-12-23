@@ -1,10 +1,14 @@
 {
   "name": "votegrity",
   "version": "1.0.0",
-  "description": "Simple voting system with untrusted server.",
+  "description": "Secret ballot voting system",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kvas-it/votegrity.git"
   },
   "keywords": [
     "voting",
@@ -13,6 +17,7 @@
   "author": "Vasily Kuznetsov",
   "license": "MIT",
   "dependencies": {
+    "bower": "^1.7.1",
     "cryptico": "=1.0.2",
     "express": "^4.13.3",
     "morgan": "^1.6.1"
@@ -25,5 +30,6 @@
       "enforceExistence": false
     },
     "esnext": true
-  }
+  },
+  "devDependencies": {}
 }
