@@ -2,6 +2,8 @@
  * Server key-value store.
  */
 
+'use strict';
+
 var fs = require('fs');
 var _ = require('lodash');
 var P = require('bluebird');

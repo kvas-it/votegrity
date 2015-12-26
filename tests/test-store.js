@@ -70,4 +70,6 @@ describe('Key-value store ', function () {
             .then(() => store.read('key'))
             .then((got) => got.should.be.eql(data));
     });
+
+    // should synchronise access to the same key.
 });
