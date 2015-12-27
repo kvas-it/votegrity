@@ -16,12 +16,8 @@
         var key = cryptico.generateRSAKey(password, bits);
         var keyString = cryptico.publicKeyString(key);
 
-        console.log('key:', keyString);
-
         var plainText = 'Hello world!';
         var cipherText = cryptico.encrypt(plainText, keyString).cipher;
-
-        console.log('encrypted:', cipherText);
 
         return cryptico.decrypt(cipherText, key).plaintext;
     }
