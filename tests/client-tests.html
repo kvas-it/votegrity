@@ -3,6 +3,7 @@
     <meta charset="utf-8">
     <title>Votegrity client tests</title>
     <link href="../node_modules/mocha/mocha.css" rel="stylesheet" />
+    <script src="../bower_components/cryptico/cryptico.js"></script>
     <script src="../client/js/app.js"></script>
   </head>
   <body>
@@ -14,16 +15,10 @@
 mocha.setup('bdd');
     </script>
 
-    <script>
-describe('Testing ', function () {
-    it('should work', function () {
-        [1, 2].should.eql([1, 2]);
-    });
-});
-    </script>
+    <script src="client/test-test.js"></script>
 
     <script>
-      mocha.checkLeaks();
+      // mocha.checkLeaks();
       mocha.run();
     </script>
   </body>

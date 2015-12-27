@@ -20,6 +20,7 @@
     "globalstrict": true,
     "globals": {
         "console": true,
-        "cryptico": true
+        "cryptico": true,
+        "votegrity": true
     }
 }
