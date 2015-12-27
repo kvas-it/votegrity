@@ -27,6 +27,24 @@ describe('Key-value store ', function () {
         });
     });
 
+    it('should create data directory if not exists', function () {
+        var dir = tmpDir + '/other';
+        store = new Store(dir);
+        var stats = fs.statSync(dir);
+        stats.isDirectory().should.be.eql(true);
+    });
+
+    it('should fail if directory is a file', function () {
+        var dir = tmpDir + '/other';
+        fs.writeFileSync(dir, '');
+        try {
+            new Store(dir);
+            fail();
+        } catch (err) {
+            err.message.should.endWith('is not a directory');
+        }
+    });
+
     it('should save values to files', function () {
         return store.write('key', 'value').then((ok) => {
             ok.should.be.ok;

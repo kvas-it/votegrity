@@ -72,6 +72,17 @@ describe('Key-value store web service', function () {
             });
     });
 
+    // Should refuse read without id.
+    // Should refuse write wthout id...
+
+    it('should refuse to write without value', function () {
+        return testRequest({method: 'write', key: 'b2'})
+            .then((res) => {
+                res.status.should.be.eql('error');
+                res.message.should.be.eql('No value provided');
+            });
+    });
+
     it('should handle funny chars', function () {
         var data = '\u1234\u2345\u3456\u4567';
         return testRequest({method: 'write', key: 'b2', value: data})

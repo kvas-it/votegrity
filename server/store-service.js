@@ -40,6 +40,9 @@ function storeService(store) {
                 .then(sendData)
                 .catch(sendError);
         } else if (method === 'write') {
+            if (!('value' in req.body)) {
+                return sendErrorMessage('No value provided');
+            }
             return store.write(req.body.key, req.body.value)
                 .then(sendOk)
                 .catch(sendError);

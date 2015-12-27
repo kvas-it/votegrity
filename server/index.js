@@ -7,6 +7,7 @@
 var path = require('path');
 var express = require('express');
 var morgan = require('morgan');
+var bodyParser = require('body-parser');
 
 var routes = require('./routes');
 
@@ -14,7 +15,9 @@ var app = express();
 
 app.set('clientRoot', path.normalize(__dirname + '/../client'));
 app.set('componentsRoot', path.normalize(__dirname + '/../bower_components'));
+app.set('storeRoot', path.normalize('/tmp/store-123'));
 app.use(morgan('dev'));
+app.use(bodyParser.json());
 
 routes.install(app);
 
