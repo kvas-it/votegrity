@@ -37,6 +37,15 @@ cli-test:
 	${MOPJS} tests/client-tests.html
 
 test:
-	make srv-test
-	make cli-test
-	make syntaxcheck
+	@echo
+	@echo === server tests ===
+	@echo
+	@make srv-test
+	@echo
+	@echo === client tests ===
+	@echo
+	@make cli-test
+	@echo
+	@echo === style checkers ===
+	@echo
+	@make syntaxcheck
