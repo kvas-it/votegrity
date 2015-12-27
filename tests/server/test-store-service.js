@@ -11,7 +11,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('supertest-as-promised');
 
-var storeService = require('../server/store-service');
+var storeService = require('../../server/store-service');
 
 function TestStore() {
     _.bindAll(this);

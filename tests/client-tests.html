@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Votegrity client tests</title>
+    <link href="../node_modules/mocha/mocha.css" rel="stylesheet" />
+    <script src="../client/js/app.js"></script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/should/should.js"></script>
+
+    <script>
+mocha.setup('bdd');
+    </script>
+
+    <script>
+describe('Testing ', function () {
+    it('should work', function () {
+        [1, 2].should.eql([1, 2]);
+    });
+});
+    </script>
+
+    <script>
+      mocha.checkLeaks();
+      mocha.run();
+    </script>
+  </body>
+</html>

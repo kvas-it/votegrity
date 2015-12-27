@@ -7,7 +7,12 @@ JSCS=${NPMBIN}/jscs
 JSHINT=${NPMBIN}/jshint
 MOCHA=${NPMBIN}/mocha
 
-SOURCES=server client/js tests
+SERVER_SRC=server
+CLIENT_SRC=client/js
+SOURCES=${SERVER_SRC} ${CLIENT_SRC}
+SERVER_TESTS=tests/server
+CLIENT_TESTS=tests/client
+TESTS=${SERVER_TESTS} ${CLIENT_TESTS}
 
 install:
 	npm install
@@ -21,9 +26,9 @@ checksum:
 	shasum -c shasums.txt
 
 syntaxcheck:
-	${JSHINT} ${SOURCES}
-	${JSCS} ${SOURCES}
+	${JSHINT} ${SOURCES} ${TESTS}
+	${JSCS} ${SOURCES} ${TESTS}
 
 test:
-	${MOCHA} tests
+	${MOCHA} ${SERVER_TESTS}
 	make syntaxcheck

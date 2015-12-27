@@ -13,7 +13,7 @@ var readFile = P.promisify(fs.readFile);
 var writeFile = P.promisify(fs.writeFile);
 var fail = () => {throw Error('Test failed');};
 
-var Store = require('../server/store');
+var Store = require('../../server/store');
 
 describe('Key-value store ', function () {
 
