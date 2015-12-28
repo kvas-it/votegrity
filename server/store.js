@@ -41,25 +41,37 @@ Store.prototype.checkKey = function (key) {
     }
 };
 
-Store.prototype.write = P.method(function (key, value) {
-    this.checkKey(key);
-    var operation = P.all([this.writes[key], this.reads[key]])
-        .then(() => writeFile(this.dir + '/' + key, value))
-        .return(true);
-    var waitHandlers = operation
-        .catch(() => true)
+/* Wrapper for serialising access to the same key. */
+Store.prototype.serialise = function (func, key, mode) {
+    var wait;
+    var promiseMap;
+    if (mode === 'r') {
+        wait = P.resolve(this.writes[key]);
+        promiseMap = this.reads;
+    } else { // 'w'
+        wait = P.all([this.writes[key], this.reads[key]]);
+        promiseMap = this.writes;
+    }
+    var operation = wait.then(func);
+    var nextWait = operation
+        .catch(() => 0)
         .then(() => {
-            if (this.writes[key] === waitHandlers) {
-                delete this.writes[key];
+            if (promiseMap[key] === nextWait) {
+                delete promiseMap[key];
             }
         });
-    this.writes[key] = waitHandlers;
+    promiseMap[key] = nextWait;
     return operation;
+};
+
+Store.prototype.write = P.method(function (key, value) {
+    this.checkKey(key);
+    return this.serialise(() => writeFile(this.dir + '/' + key, value), key, 'w')
+        .return(true);
 });
 
 Store.prototype.read = function (key) {
-    var operation = P.resolve(this.writes[key])
-        .then(() => readFile(this.dir + '/' + key, 'utf8'))
+    return this.serialise(() => readFile(this.dir + '/' + key, 'utf8'), key, 'r')
         .catch((err) => {
             if (_.startsWith(err.message, 'ENOENT')) {
                 throw Error('Missing key: ' + key);
@@ -67,15 +79,6 @@ Store.prototype.read = function (key) {
                 throw err;
             }
         });
-    var waitHandlers = operation
-        .catch(() => true)
-        .then(() => {
-            if (this.reads[key] === waitHandlers) {
-                delete this.reads[key];
-            }
-        });
-    this.reads[key] = waitHandlers;
-    return operation;
 };
 
 module.exports = Store;
