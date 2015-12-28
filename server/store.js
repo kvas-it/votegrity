@@ -14,6 +14,8 @@ var writeFile = P.promisify(fs.writeFile);
 function Store(dir) {
     _.bindAll(this);
     this.dir = dir;
+    this.reads = {};
+    this.writes = {};
     this.ensureDir();
 }
 
@@ -41,16 +43,39 @@ Store.prototype.checkKey = function (key) {
 
 Store.prototype.write = P.method(function (key, value) {
     this.checkKey(key);
-    return writeFile(this.dir + '/' + key, value).return(true);
+    var operation = P.all([this.writes[key], this.reads[key]])
+        .then(() => writeFile(this.dir + '/' + key, value))
+        .return(true);
+    var waitHandlers = operation
+        .catch(() => true)
+        .then(() => {
+            if (this.writes[key] === waitHandlers) {
+                delete this.writes[key];
+            }
+        });
+    this.writes[key] = waitHandlers;
+    return operation;
 });
 
 Store.prototype.read = function (key) {
-    return readFile(this.dir + '/' + key, 'utf8')
+    var operation = P.resolve(this.writes[key])
+        .then(() => readFile(this.dir + '/' + key, 'utf8'))
         .catch((err) => {
             if (_.startsWith(err.message, 'ENOENT')) {
                 throw Error('Missing key: ' + key);
+            } else {
+                throw err;
             }
         });
+    var waitHandlers = operation
+        .catch(() => true)
+        .then(() => {
+            if (this.reads[key] === waitHandlers) {
+                delete this.reads[key];
+            }
+        });
+    this.reads[key] = waitHandlers;
+    return operation;
 };
 
 module.exports = Store;
