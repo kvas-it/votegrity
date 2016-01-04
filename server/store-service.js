@@ -5,6 +5,7 @@
 'use strict';
 
 function storeService(store) {
+
     return function processRequest(req, res) {
 
         function respond(response) {
@@ -34,20 +35,30 @@ function storeService(store) {
         }
 
         var method = req.body.method;
+        var at = req.body.accessToken;
+        var key = req.body.key;
+        var value = req.body.value;
+
+        if (method !== 'read' && method !== 'write') {
+            return sendErrorMessage('Invalid method');
+        }
+
+        if (!at) {
+            return sendErrorMessage('Access denied');
+        }
+
+        if (!key) {
+            return sendErrorMessage('No key provided');
+        }
+
+        if (method === 'write' && value === undefined) {
+            return sendErrorMessage('No value provided');
+        }
 
         if (method === 'read') {
-            return store.read(req.body.key)
-                .then(sendData)
-                .catch(sendError);
-        } else if (method === 'write') {
-            if (!('value' in req.body)) {
-                return sendErrorMessage('No value provided');
-            }
-            return store.write(req.body.key, req.body.value)
-                .then(sendOk)
-                .catch(sendError);
+            return store.read(key, at).then(sendData).catch(sendError);
         } else {
-            return sendErrorMessage('Invalid method');
+            return store.write(key, value, at).then(sendOk).catch(sendError);
         }
     };
 }

@@ -13,17 +13,20 @@ var request = require('supertest-as-promised');
 
 var storeService = require('../../server/store-service');
 
-function TestStore() {
+function TestStore(data) {
     _.bindAll(this);
-    this.data = {};
+    this.data = data;
+    this.ops = [];
 }
 
-TestStore.prototype.write = P.method(function (key, value) {
+TestStore.prototype.write = P.method(function (key, value, accessToken) {
     this.data[key] = value;
+    this.ops.push('w:' + key + ':' + value + ':' + accessToken);
 });
 
-TestStore.prototype.read = P.method(function (key) {
+TestStore.prototype.read = P.method(function (key, accessToken) {
     if (key in this.data) {
+        this.ops.push('r:' + key + ':' + accessToken);
         return this.data[key];
     } else {
         throw Error('Missing key: ' + key);
@@ -36,14 +39,16 @@ describe('Key-value store web service', function () {
     var app;
 
     beforeEach(function () {
-        store = new TestStore();
-        store.write('a1', 'hello');
+        store = new TestStore({a1: 'hello'});
         app = express();
         app.use(bodyParser.json());
         app.use('/store', storeService(store));
     });
 
     function testRequest(req) {
+        if (req.accessToken === undefined) {
+            req.accessToken = 'token';
+        }
         return request(app)
             .post('/store')
             .send(req)
@@ -61,6 +66,7 @@ describe('Key-value store web service', function () {
             .then((res) => {
                 res.status.should.be.eql('ok');
                 res.data.should.be.eql('hello');
+                store.ops.should.be.eql(['r:a1:token']);
             });
     });
 
@@ -69,11 +75,25 @@ describe('Key-value store web service', function () {
             .then((res) => {
                 res.status.should.be.eql('ok');
                 store.data.b2.should.be.eql('world');
+                store.ops.should.be.eql(['w:b2:world:token']);
             });
     });
 
-    // Should refuse read without id.
-    // Should refuse write wthout id...
+    it('should refuse to read without id', function () {
+        return testRequest({method: 'read'})
+            .then((res) => {
+                res.status.should.be.eql('error');
+                res.message.should.be.eql('No key provided');
+            });
+    });
+
+    it('should refuse to write without id', function () {
+        return testRequest({method: 'write', value: 'value'})
+            .then((res) => {
+                res.status.should.be.eql('error');
+                res.message.should.be.eql('No key provided');
+            });
+    });
 
     it('should refuse to write without value', function () {
         return testRequest({method: 'write', key: 'b2'})
@@ -114,6 +134,14 @@ describe('Key-value store web service', function () {
             .then((res) => {
                 res.status.should.be.eql('error');
                 res.message.should.be.eql('Missing key: missing');
+            });
+    });
+
+    it('should refuse access for empty AT', function () {
+        return testRequest({method: 'read', accessToken: '', key: 'a1'})
+            .then((res) => {
+                res.status.should.be.eql('error');
+                res.message.should.be.eql('Access denied');
             });
     });
 });
