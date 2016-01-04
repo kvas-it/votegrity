@@ -1,2 +1,3 @@
 c1435235e2a297d3656e0409939f9f118b5d19a0  node_modules/cryptico/lib/cryptico.js
 4393480e210ea155210ee56d7b626f9bda9198ae  bower_components/cryptico/cryptico.js
+0fed45ad7a48ace869bc725ca474ad86a1ef1562  bower_components/jquery/dist/jquery.js

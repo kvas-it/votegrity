@@ -21,6 +21,7 @@
     "tests"
   ],
   "dependencies": {
-    "cryptico": "*"
+    "cryptico": "*",
+    "jquery": "2.1.4"
   }
 }
