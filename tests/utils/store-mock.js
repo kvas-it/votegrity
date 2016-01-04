@@ -63,7 +63,7 @@ StoreMock.prototype.getTimeStamp = function (key, accessToken) {
 StoreMock.prototype.write = function (key, value, accessToken) {
     return this.exec(() => {
         this.data[key] = value;
-        this.timestamps[key] = Date.now();
+        this.timestamps[key] = new Date(Date.now());
         return true;
     }, 'w', key, value, accessToken);
 };
