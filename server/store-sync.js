@@ -46,4 +46,8 @@ StoreSync.prototype.write = function (key, value) {
     return this.serialise(() => this.base.write(key, value), key, 'w');
 };
 
+StoreSync.prototype.getTimeStamp = function (key) {
+    return this.serialise(() => this.base.getTimeStamp(key), key, 'r');
+};
+
 module.exports = StoreSync;

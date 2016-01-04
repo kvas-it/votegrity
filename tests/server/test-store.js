@@ -88,4 +88,13 @@ describe('Key-value store ', function () {
             .then(() => store.read('key'))
             .then((got) => got.should.be.eql(data));
     });
+
+    it('should provide key timestamps', function () {
+        var stat = P.promisify(fs.stat);
+        return store.write('key', 'value')
+            .then(() => store.getTimeStamp('key'))
+            .then((ts) =>
+                stat(tmpDir + '/key').then((stats) =>
+                    ts.getTime().should.be.eql(stats.mtime.getTime())));
+    });
 });

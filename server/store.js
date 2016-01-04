@@ -10,6 +10,7 @@ var P = require('bluebird');
 
 var readFile = P.promisify(fs.readFile);
 var writeFile = P.promisify(fs.writeFile);
+var statFile = P.promisify(fs.stat);
 
 function Store(dir) {
     _.bindAll(this);
@@ -53,6 +54,18 @@ Store.prototype.read = function (key) {
                 throw err;
             }
         });
+};
+
+Store.prototype.getTimeStamp = function (key) {
+    return statFile(this.dir + '/' + key)
+        .catch((err) => {
+            if (_.startsWith(err.message, 'ENOENT')) {
+                throw Error('Missing key: ' + key);
+            } else {
+                throw err;
+            }
+        })
+        .then((stats) => stats.mtime);
 };
 
 module.exports = Store;
