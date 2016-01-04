@@ -5,37 +5,10 @@
 'use strict';
 
 require('should');
-var _ = require('lodash');
 var P = require('bluebird');
 
+var StoreMock = require('../utils/store-mock.js');
 var StoreSync = require('../../server/store-sync');
-
-/* Store for syncronisation tests. */
-function TestStore() {
-    _.bindAll(this);
-    this.data = {};
-    this.ops = [];
-}
-
-TestStore.prototype.read = function (key) {
-    this.ops.push('r' + key);
-    return P.delay(3)
-        .then(() => this.ops.push('R' + key))
-        .then(() => this.data[key]);
-};
-
-TestStore.prototype.getTimeStamp = function (key) {
-    this.ops.push('t' + key);
-    return P.delay(3).then(() => this.ops.push('T' + key));
-};
-
-TestStore.prototype.write = function (key, value) {
-    this.ops.push('w' + key + ':' + value);
-    return P.delay(3)
-        .then(() => this.data[key] = value)
-        .then(() => this.ops.push('W' + key + ':' + value))
-        .return(true);
-};
 
 describe('Key-value store synchroniser', function () {
 
@@ -43,7 +16,7 @@ describe('Key-value store synchroniser', function () {
     var ss;
 
     beforeEach(function () {
-        store = new TestStore();
+        store = new StoreMock({delay: 3, record: true});
         ss = new StoreSync(store);
     });
 
@@ -59,11 +32,11 @@ describe('Key-value store synchroniser', function () {
             r1_got.should.be.eql('1');
             r2_got.should.be.eql('2');
             store.ops.should.be.eql([
-                'wa:1', 'Wa:1',
-                'ra', 'Ra',
-                'wa:2', 'Wa:2',
-                'ra', 'Ra',
-                'wa:3', 'Wa:3'
+                'w:a:1', 'W:a:1',
+                'r:a', 'R:a',
+                'w:a:2', 'W:a:2',
+                'r:a', 'R:a',
+                'w:a:3', 'W:a:3'
             ]);
         });
     });
@@ -75,7 +48,9 @@ describe('Key-value store synchroniser', function () {
         var r2 = ss.read('a');
 
         return P.join(r1, r2, () => {
-            store.ops.should.be.eql(['wa:1', 'Wa:1', 'ra', 'ra', 'Ra', 'Ra']);
+            store.ops.should.be.eql([
+                'w:a:1', 'W:a:1', 'r:a', 'r:a', 'R:a', 'R:a'
+            ]);
         });
     });
 
@@ -85,7 +60,7 @@ describe('Key-value store synchroniser', function () {
         var wb = ss.write('b', '1');
 
         return P.join(wa, wb, () => {
-            store.ops.should.be.eql(['wa:1', 'wb:1', 'Wa:1', 'Wb:1']);
+            store.ops.should.be.eql(['w:a:1', 'w:b:1', 'W:a:1', 'W:b:1']);
         });
     });
 
@@ -100,8 +75,8 @@ describe('Key-value store synchroniser', function () {
 
         return P.join(wa, ta, tb1, tb2, wb, tb3, () => {
             store.ops.should.be.eql([
-                'wa:1', 'tb', 'tb', 'Wa:1', 'ta', 'Tb', 'Tb',
-                'wb:2', 'Ta', 'Wb:2', 'tb', 'Tb'
+                'w:a:1', 't:b', 't:b', 'W:a:1', 't:a', 'T:b', 'T:b',
+                'w:b:2', 'T:a', 'W:b:2', 't:b', 'T:b'
             ]);
         });
     });

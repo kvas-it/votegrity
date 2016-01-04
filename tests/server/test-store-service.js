@@ -5,33 +5,12 @@
 'use strict';
 
 require('should');
-var _ = require('lodash');
-var P = require('bluebird');
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('supertest-as-promised');
 
+var StoreMock = require('../utils/store-mock.js');
 var storeService = require('../../server/store-service');
-
-function TestStore(data) {
-    _.bindAll(this);
-    this.data = data;
-    this.ops = [];
-}
-
-TestStore.prototype.write = P.method(function (key, value, accessToken) {
-    this.data[key] = value;
-    this.ops.push('w:' + key + ':' + value + ':' + accessToken);
-});
-
-TestStore.prototype.read = P.method(function (key, accessToken) {
-    if (key in this.data) {
-        this.ops.push('r:' + key + ':' + accessToken);
-        return this.data[key];
-    } else {
-        throw Error('Missing key: ' + key);
-    }
-});
 
 describe('Key-value store web service', function () {
 
@@ -39,7 +18,7 @@ describe('Key-value store web service', function () {
     var app;
 
     beforeEach(function () {
-        store = new TestStore({a1: 'hello'});
+        store = new StoreMock({record: true, data: {a1: 'hello'}});
         app = express();
         app.use(bodyParser.json());
         app.use('/store', storeService(store));
