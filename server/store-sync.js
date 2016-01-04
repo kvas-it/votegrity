@@ -16,7 +16,7 @@ function StoreSync(base) {
 }
 
 /* Wrapper for serialising access to the same key. */
-StoreSync.prototype.serialise = function (func, key, mode) {
+StoreSync.prototype.serialise = function (key, mode, func) {
     var wait;
     var promiseMap;
     if (mode === 'r') {
@@ -38,16 +38,19 @@ StoreSync.prototype.serialise = function (func, key, mode) {
     return operation;
 };
 
-StoreSync.prototype.read = function (key) {
-    return this.serialise(() => this.base.read(key), key, 'r');
+StoreSync.prototype.read = function (key, accessToken) {
+    return this.serialise(key, 'r',
+            () => this.base.read(key, accessToken));
 };
 
-StoreSync.prototype.write = function (key, value) {
-    return this.serialise(() => this.base.write(key, value), key, 'w');
+StoreSync.prototype.write = function (key, value, accessToken) {
+    return this.serialise(key, 'w',
+            () => this.base.write(key, value, accessToken));
 };
 
-StoreSync.prototype.getTimeStamp = function (key) {
-    return this.serialise(() => this.base.getTimeStamp(key), key, 'r');
+StoreSync.prototype.getTimeStamp = function (key, accessToken) {
+    return this.serialise(key, 'r',
+            () => this.base.getTimeStamp(key, accessToken));
 };
 
 module.exports = StoreSync;

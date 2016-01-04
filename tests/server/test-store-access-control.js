@@ -9,6 +9,7 @@ var P = require('bluebird');
 
 var cu = require('../../server/crypto-utils');
 var StoreMock = require('../utils/store-mock');
+var StoreSync = require('../../server/store-sync');
 var StoreAC = require('../../server/store-access-control');
 
 var fail = () => {throw Error('Test failed');};
@@ -47,7 +48,7 @@ describe('Key-value store access control', function () {
             },
             start: new Date(2000, 1, 1)
         });
-        ac = new StoreAC(store);
+        ac = new StoreSync(new StoreAC(store));
     });
 
     it('should allow access if the users list is not there', function () {
@@ -99,8 +100,9 @@ describe('Key-value store access control', function () {
     });
 
     it('should allow writing once', function () {
-        return ac.write('c', '1', v1AT)
-            .then(() =>
-                ac.write('c', '1', v1AT).then(fail).catch(accessDenied));
+        return P.all([
+            ac.write('c', '1', v1AT),
+            ac.write('c', '1', v1AT).then(fail).catch(accessDenied)
+        ]);
     });
 });
