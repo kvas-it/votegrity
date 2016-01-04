@@ -268,13 +268,36 @@ The data is stored on the disk in one folder with files
 and the access is synchronised by the server (only one write at a time,
 reads only if there's no write).
 
-Access is controlled via the access token table and the ACL,
-which are stored in two buckets. There are three access levels:
+The access to the key-value store is controlled at the level of the web service.
+The data that defines access consists of the user list
+and access control lists (ACLs) for individual keys.
+All of those lists are also stored in the key-value store.
 
-* ``read`` -- Allows reading the content,
-* ``write`` -- Allows writing the content,
-* ``write-once(<timestamp>)`` -- Allows writing as long as
-  time of last modification of the bucket is before given timestamp.
+##### User list
+
+User list is stored at the key ``users`` and contains information
+about users including name, e-mail, double hashed security token
+and their role (one of ``voter``, ``counter`` or ``moderator``).
+The format of the lines is similar to unix ``/etc/passwd`` file:
+
+    <htoken>:<email>:<name>:<role>
+    # Lines starting with hash are ignored
+ 
+User list is readable by all authenticated users and writable by the moderator. 
+
+##### ACLs
+
+ACL for any key is stored as ``<key>.acl``.
+For example the ACL for the user list is stored as ``users.acl``.
+The ACL consists of the lines that contain user hashed token
+or role followed by access mode ``read``, ``write``, ``write-once(<timestamp>)``.
+
+    <htoken-or-role>:<access-mode>
+
+There can be more than one entry that applies to the same user.
+Access is granted if any one of them would grant access.
+Moderator is always given full access to all keys.
+Everyone else has no access unless explicitly allowed by the ACL.
 
 ### Architecture
 
