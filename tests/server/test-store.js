@@ -88,16 +88,4 @@ describe('Key-value store ', function () {
             .then(() => store.read('key'))
             .then((got) => got.should.be.eql(data));
     });
-
-    it('should synchronise access to the same key', function () {
-        store.write('a', '1');
-        var r1 = store.read('a');
-        store.write('a', '2');
-        var r2 = store.read('a');
-        store.write('a', '3');
-        return P.join(r1, r2, (r1_got, r2_got) => {
-            r1_got.should.be.eql('1');
-            r2_got.should.be.eql('2');
-        });
-    });
 });
