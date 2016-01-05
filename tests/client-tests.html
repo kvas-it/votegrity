@@ -6,8 +6,11 @@
     <script src="../bower_components/cryptico/cryptico.js"></script>
     <script src="../bower_components/jquery/dist/jquery.js"></script>
     <script src="../bower_components/ayepromise/ayepromise.js"></script>
+    <script src="../client/js/utils.js"></script>
     <script src="../client/js/store.js"></script>
-    <script src="../client/js/app.js"></script>
+    <script src="../client/js/crypto.js"></script>
+    <script src="../client/js/ui.js"></script>
+    <script src="../client/js/auth.js"></script>
   </head>
   <body>
     <div id="mocha"></div>
@@ -19,11 +22,23 @@ mocha.setup('bdd');
     </script>
 
     <script src="client/test-test.js"></script>
+    <script src="client/test-utils.js"></script>
+    <script src="client/test-crypto.js"></script>
+    <script src="client/test-ui.js"></script>
     <script src="client/test-store.js"></script>
 
     <script>
 // mocha.checkLeaks();
 mocha.run();
     </script>
+
+    <div style="visibility: hidden">
+      <!-- mocks for ui testing. -->
+      <div id="error">
+        <span id="error-message"></span>
+      </div>
+      <div id="loading"></div>
+      <div id="auth-form"></div>
+    </div>
   </body>
 </html>

@@ -19,10 +19,9 @@
     "trailing": true,
     "smarttabs": true,
     "globals": {
+        "$": true,
         "console": true,
         "ayepromise": true,
-        "cryptico": true,
-        "votegrity": true,
-        "votegrityStore": true
+        "cryptico": true
     }
 }

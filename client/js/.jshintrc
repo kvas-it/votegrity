@@ -1,7 +1,7 @@
 {
     "node": false,
     "browser": true,
-    "esnext": true,
+    "esnext": false,
     "bitwise": true,
     "camelcase": false,
     "curly": true,
@@ -23,6 +23,7 @@
         "console": true,
         "ayepromise": true,
         "cryptico": true,
-        "votegrity": true
+        "votegrity": true,
+        "votegrityStore": true
     }
 }

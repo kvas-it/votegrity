@@ -4,15 +4,19 @@
 
 describe('Store client', function () {
 
+    'use strict';
+
+    var store = window.registry.store;
+
     beforeEach(function () {
-        votegrityStore.setBaseUrl('http://localhost:3000');
-        votegrityStore.setAccessToken('dummy');
+        store.setBaseUrl('http://localhost:3000');
+        store.setAccessToken('dummy');
     });
 
     it('should write and read', function () {
-        return votegrityStore.write('a1', '123')
+        return store.write('a1', '123')
             .then(function () {
-                return votegrityStore.read('a1');
+                return store.read('a1');
             })
             .then(function (got) {
                 got.should.be.eql('123');
@@ -23,9 +27,9 @@ describe('Store client', function () {
         var usersData = 'TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:john@doe.com:John Doe:moderator';
         var accessToken = 'pmWkWSBCL51Bfkhn79xPuKBKHz//H6';
 
-        return votegrityStore.write('users', usersData)
+        return store.write('users', usersData)
             .then(function () {
-                return votegrityStore.read('users')
+                return store.read('users')
                     .then(function () {
                         throw Error('Still can access');
                     },
@@ -34,14 +38,14 @@ describe('Store client', function () {
                     });
             })
             .then(function () {
-                votegrityStore.setAccessToken(accessToken);
-                return votegrityStore.read('users')
+                store.setAccessToken(accessToken);
+                return store.read('users')
                     .then(function (data) {
                         data.should.be.eql(usersData);
                     });
             })
             .then(function () {
-                return votegrityStore.write('users', '');
+                return store.write('users', '');
             });
     });
 });
