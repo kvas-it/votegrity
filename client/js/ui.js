@@ -14,12 +14,14 @@
     ui.switchableDivs = ['auth-form', 'loading'];
     ui.switchableStates = {
         'auth-form': ['auth-form'],
-        loading: ['loading']
+        loading: ['loading'],
+        main: []
     };
     ui.currentState = 'loading';
 
     ui.switchToState = function (state) {
         if (state in ui.switchableStates) {
+            ui.currentState = state;
             var stateDivs = ui.switchableStates[state];
             ui.switchableDivs.forEach(function (divId) {
                 var div = $('#' + divId);
