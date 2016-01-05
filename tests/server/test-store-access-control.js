@@ -44,7 +44,9 @@ describe('Key-value store access control', function () {
                 b: 'hello',
                 'b.acl': [cnt[0] + ':write', v1[0] + ':read'].join('\n'),
                 c: 'hello',
-                'c.acl': v1[0] + ':write-once@1451948604276'
+                'c.acl': v1[0] + ':write-once@1451948604276',
+                d: 'yo!',
+                'd.acl': 'counter:write\nvoter:read'
             },
             start: new Date(2000, 1, 1)
         });
@@ -96,6 +98,17 @@ describe('Key-value store access control', function () {
             ac.read('b', v1AT),
             ac.getTimeStamp('b', v1AT),
             ac.write('b', '1', v1AT).then(fail).catch(accessDenied)
+        ]);
+    });
+
+    it('should follow the acl with roles', function () {
+        return P.all([
+            ac.read('d', cntAT).then(fail).catch(accessDenied),
+            ac.getTimeStamp('d', cntAT).then(fail).catch(accessDenied),
+            ac.write('d', '1', cntAT),
+            ac.read('d', v1AT),
+            ac.getTimeStamp('d', v1AT),
+            ac.write('d', '1', v1AT).then(fail).catch(accessDenied)
         ]);
     });
 

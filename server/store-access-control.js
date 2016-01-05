@@ -31,31 +31,32 @@ StoreAC.prototype.loadACL = function (key) {
 };
 
 StoreAC.prototype.checkACL = function (key, type, user) {
-    return this.loadACL(key)
-        .then((acl) => {
-            var lines = _.filter(acl, (l) => l.htoken === user.htoken);
-            var types = _.map(lines, 'type');
+    return this.loadACL(key).then((acl) => {
 
-            if (types.indexOf(type) !== -1) {
-                return;
-            }
+        var lines = _.filter(acl, (l) => l.htoken === user.htoken ||
+                                         l.htoken === user.role);
+        var types = _.map(lines, 'type');
 
-            if (type === 'read') {
-                throw Error('Access denied');
-            }
+        if (types.indexOf(type) !== -1) {
+            return;
+        }
 
-            // check if any write-once is applicable.
-            var onces = _.filter(types, (t) => _.startsWith(t, 'write-once@'));
-            var ends = _.map(onces, (o) => Number(o.substr(11)));
-            var end = _.max(ends);
+        if (type === 'read') {
+            throw Error('Access denied');
+        }
 
-            return this.base.getTimeStamp(key)
-                .then((ts) => {
-                    if (ts.getTime() > end) {
-                        throw Error('Access denied');
-                    }
-                });
-        });
+        // check if any write-once is applicable.
+        var onces = _.filter(types, (t) => _.startsWith(t, 'write-once@'));
+        var ends = _.map(onces, (o) => Number(o.substr(11)));
+        var end = _.max(ends);
+
+        return this.base.getTimeStamp(key)
+            .then((ts) => {
+                if (ts.getTime() > end) {
+                    throw Error('Access denied');
+                }
+            });
+    });
 };
 
 StoreAC.prototype.accessCheck = function (key, type, accessToken) {
