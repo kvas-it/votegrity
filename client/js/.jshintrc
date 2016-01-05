@@ -21,6 +21,7 @@
     "globals": {
         "$": true,
         "console": true,
+        "ayepromise": true,
         "cryptico": true,
         "votegrity": true
     }

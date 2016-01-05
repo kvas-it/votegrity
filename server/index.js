@@ -15,7 +15,8 @@ var app = express();
 
 app.set('clientRoot', path.normalize(__dirname + '/../client'));
 app.set('componentsRoot', path.normalize(__dirname + '/../bower_components'));
-app.set('storeRoot', path.normalize('/tmp/store-123'));
+app.set('storeRoot', path.normalize(
+            process.env.VOTEGRITY_STORE_PATH || '/tmp/votegrity-store'));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 

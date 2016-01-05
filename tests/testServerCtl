@@ -1,0 +1,29 @@
+#!/bin/bash
+
+DIR=`dirname $0`
+DIR=`(cd $DIR; pwd)`
+BASE_DIR=`dirname $DIR`
+LOG=/tmp/test-server.log
+PID=/tmp/test-server.pid
+
+export VOTEGRITY_STORE_PATH=/tmp/test-store
+
+cd $BASE_DIR
+case x$1 in
+    xstart)
+	echo 'Starting test server'
+	rm -Rf $VOTEGRITY_STORE_PATH
+	nohup node server > $LOG 2>&1 & echo $! > $PID
+	;;
+    xstop)
+	echo 'Stopping test server'
+	cat $PID | xargs kill
+	;;
+    xfail)
+	echo 'Stopping tests server after test failure'
+	cat $PID | xargs kill && (echo '=== Test server log ==='; cat $LOG)
+	exit 1
+	;;
+    *)
+    	echo "Usage: $0 start|stop|fail"
+esac

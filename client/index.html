@@ -5,16 +5,18 @@
     <title>Votegrity</title>
     <script src="cr/cryptico.js"></script>
     <script src="jq/jquery.js"></script>
+    <script src="ap/ayepromise.js"></script>
+    <script src="js/store.js"></script>
     <script src="js/app.js"></script>
     <script>
 $(document).ready(votegrity.init);
     </script>
   </head>
   <body>
-<div id="auth-form">
-  Authentication token
-  <input type="text" name="auth-token" id="auth-token-input" />
-  <button onclick="votegrity.authSubmit">submit</button>
-</div>
+    <div id="auth-form">
+      Authentication token
+      <input type="text" name="auth-token" id="auth-token-input" />
+      <button onclick="votegrity.authSubmit">submit</button>
+    </div>
   </body>
 </html>

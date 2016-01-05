@@ -22,6 +22,7 @@ function install(app) {
     app.use('/js', express.static(app.get('clientRoot') + '/js'));
     app.use('/cr', express.static(app.get('componentsRoot') + '/cryptico'));
     app.use('/jq', express.static(app.get('componentsRoot') + '/jquery/dist'));
+    app.use('/ap', express.static(app.get('componentsRoot') + '/ayepromise'));
     app.route('/*').get(function (req, res) {
         res.sendFile(app.get('clientRoot') + '/index.html');
     });

@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "cryptico": "*",
-    "jquery": "2.1.4"
+    "jquery": "2.1.4",
+    "ayepromise": "1.1.2"
   }
 }

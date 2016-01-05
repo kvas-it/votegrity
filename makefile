@@ -14,6 +14,8 @@ SOURCES=${SERVER_SRC} ${CLIENT_SRC}
 SERVER_TESTS=tests/server
 CLIENT_TESTS=tests/client
 TESTS=${SERVER_TESTS} ${CLIENT_TESTS}
+NODE=node
+TS_CTL=tests/testServerCtl
 
 install:
 	npm install
@@ -34,7 +36,10 @@ srv-test:
 	${MOCHA} ${SERVER_TESTS}
 
 cli-test:
-	${MOPJS} tests/client-tests.html
+	- ${TS_CTL} stop >/dev/null 2>&1
+	${TS_CTL} start
+	${MOPJS} --web-security=no tests/client-tests.html || ${TS_CTL} fail
+	${TS_CTL} stop
 
 test:
 	@echo
