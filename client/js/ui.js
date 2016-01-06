@@ -79,7 +79,22 @@
 
     $(document).ready(function () {
         ui.addSwitchableState('loading', {divs: ['loading']});
-        ui.addSwitchableState('main', {divs: ['main']});
+        ui.addSwitchableState('main', {
+            divs: [],
+            onEnter: function () {
+                var user = registry.auth.user;
+                var role = user ? user.role : 'anonymous';
+                if (role === 'moderator') {
+                    ui.switchToState('mod-main');
+                } else if (user.role === 'counter') {
+                    ui.switchToState('cnt-main');
+                } else if (user.role === 'voter') {
+                    ui.switchToState('vot-main');
+                } else {
+                    ui.switchToState('auth-form');
+                }
+            }
+        });
         ui.switchToState('loading');
     });
 })(this.registry);

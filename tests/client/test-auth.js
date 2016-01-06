@@ -2,7 +2,7 @@
  * Tests for auth module.
  */
 
-describe('Auth module', function () {
+describe('Auth', function () {
 
     'use strict';
 
@@ -10,10 +10,15 @@ describe('Auth module', function () {
     var auth = window.registry.auth;
     var ui = window.registry.ui;
 
+    var users =
+        'TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:alice@mod.org:Alice Mod:moderator\n' +
+        '+T/xCTkR/ysE6GRfQaf4LOV38yfvCZ:bob@cnt.org:Bob Cnt:counter\n' +
+        'U/i4hqAWk4EIKL3CBIXlxK7Xgimepq:carol@vot.org:Carol Vot:voter';
+
     beforeEach(function () {
         mocking.mock('store.read', function () {
             var d = ayepromise.defer();
-            d.resolve('TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:a@b.c:A:moderator');
+            d.resolve(users);
             return d.promise;
         });
     });
@@ -21,16 +26,33 @@ describe('Auth module', function () {
     afterEach(mocking.unmockAll);
 
     it('should log in with password from url', function () {
+        auth.user = null;
         mocking.mock('url', 'http://a/b?&auth=123');
         return auth.init().then(function () {
-            ui.currentState.should.be.eql('main');
+            auth.user.should.be.ok;
         });
     });
 
-    it('should log in with good password', function () {
+    it('should log in as moderator', function () {
         return auth.uiAuthenticate('123').then(function () {
-            ui.currentState.should.be.eql('main');
-            $('#user-info').html().should.be.eql('Logged in as A (moderator)');
+            ui.currentState.should.be.eql('mod-main');
+            $('#user-info').html().should.be.eql('Logged in as Alice Mod (moderator)');
+            $('#logout-button').css('display').should.be.eql('inline-block');
+        });
+    });
+
+    it('should log in as counter', function () {
+        return auth.uiAuthenticate('456').then(function () {
+            ui.currentState.should.be.eql('cnt-main');
+            $('#user-info').html().should.be.eql('Logged in as Bob Cnt (counter)');
+            $('#logout-button').css('display').should.be.eql('inline-block');
+        });
+    });
+
+    it('should log in as voter', function () {
+        return auth.uiAuthenticate('789').then(function () {
+            ui.currentState.should.be.eql('vot-main');
+            $('#user-info').html().should.be.eql('Logged in as Carol Vot (voter)');
             $('#logout-button').css('display').should.be.eql('inline-block');
         });
     });

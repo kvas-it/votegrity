@@ -22,8 +22,6 @@
         "$": true,
         "console": true,
         "ayepromise": true,
-        "cryptico": true,
-        "votegrity": true,
-        "votegrityStore": true
+        "cryptico": true
     }
 }
