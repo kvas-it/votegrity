@@ -39,6 +39,8 @@
         var msg = err.message;
         if (msg === 'Access denied' || msg === 'Unknown user') {
             msg = 'Authentication failed';
+        } else if (msg === 'Request failed') {
+            msg = 'Server not available';
         } else if (msg === 'Missing key: users') {
             msg = 'Access control not configured';
         }

@@ -23,6 +23,17 @@ describe('Store client', function () {
             });
     });
 
+    it('should report server unavailability', function () {
+        store.setBaseUrl('http://localhost:3001');
+        return store.read('a1')
+            .then(function () {
+                throw Error('Dead server not noticed');
+            },
+            function (err) {
+                err.message.should.be.eql('Request failed');
+            });
+    });
+
     it('should pass the access token', function () {
         var usersData = 'TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:john@doe.com:John Doe:moderator';
         var accessToken = 'pmWkWSBCL51Bfkhn79xPuKBKHz//H6';

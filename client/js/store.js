@@ -40,6 +40,9 @@
         }
 
         function ajaxError(xhr, status, error) {
+            if (!error) {
+                error = 'Request failed';
+            }
             deferred.reject(Error(error));
         }
 
