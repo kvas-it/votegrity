@@ -7,8 +7,27 @@ div {
     box-sizing: border-box;
 }
 
-input, button {
+p.info {
+    width: 600px;
+    font-style: oblique;
+    color: #444;
+}
+
+input, button, textarea {
     font-size: 100%;
+}
+
+textarea {
+    width: 600px;
+    height: 200px;
+}
+
+input {
+    width: 200px;
+}
+
+input.big {
+    width: 600px;
 }
 
 .hidden {display: none;}
@@ -19,6 +38,22 @@ input, button {
     border-bottom: 1px solid grey;
     background: #ccf;
     padding: 10px;
+}
+
+a.menu-item {
+    padding: 5px;
+    margin-right: 10px;
+    text-decoration: none;
+    color: black;
+}
+
+a.menu-item:hover {
+    background: white;
+}
+
+#keygen {
+    margin-left: 50px;
+    margin-top: 50px;
 }
 
 #auth-form {

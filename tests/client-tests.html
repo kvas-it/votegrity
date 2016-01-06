@@ -9,8 +9,9 @@
     <script src="../client/js/registry.js"></script>
     <script src="../client/js/utils.js"></script>
     <script src="../client/js/store.js"></script>
-    <script src="../client/js/crypto.js"></script>
     <script src="../client/js/ui.js"></script>
+    <script src="../client/js/crypto.js"></script>
+    <script src="../client/js/keygen.js"></script>
     <script src="../client/js/auth.js"></script>
 
     <script src="client/mocking.js"></script>
@@ -30,6 +31,7 @@ mocha.setup('bdd');
     <script src="client/test-ui.js"></script>
     <script src="client/test-store.js"></script>
     <script src="client/test-auth.js"></script>
+    <script src="client/test-keygen.js"></script>
 
     <script>
 // mocha.checkLeaks();
@@ -50,6 +52,8 @@ mocha.run();
       </div>
       <div id="loading"></div>
       <div id="auth-form"></div>
+      <input id="keygen-password" />
+      <textarea id="keygen-public-info"></textarea>
     </div>
   </body>
 </html>

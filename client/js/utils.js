@@ -51,4 +51,15 @@
         });
     };
 
+    /* Split data (like a public key) into multiple short lines. */
+    utils.wrapData = function (data, maxlen) {
+        var lines = [];
+        while (data.length > maxlen) {
+            lines.push(data.substr(0, maxlen));
+            data = data.substr(maxlen);
+        }
+        lines.push(data);
+        return lines.join('\n');
+    };
+
 })(this.registry);

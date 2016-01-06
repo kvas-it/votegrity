@@ -20,6 +20,26 @@
         });
     };
 
+    ui.fillMenu = function (items) {
+        $('#menu').html(items.map(function (item) {
+            return '<a class="menu-item" href="#">' + item.name + '</a>';
+        }).join('\n') + '&nbsp;');
+
+        $('#menu > a').each(function (i, element) {
+            var item = items[i];
+            if (item.state && !item.func) {
+                item.func = ui.stateSwitcher(item.state);
+            }
+            $(element).click(item.func);
+        });
+    };
+
+    ui.stateSwitcher = function (state) {
+        return function () {
+            ui.switchToState(state);
+        };
+    };
+
     ui.switchToState = function (state) {
         if (state in ui.switchableStates) {
             ui.currentState = state;
@@ -32,6 +52,7 @@
                     jqDiv.show();
                 }
             });
+            ui.fillMenu(stateConfig.menu || []);
             if (stateConfig.onEnter) {
                 stateConfig.onEnter();
             }

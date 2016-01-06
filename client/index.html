@@ -13,6 +13,7 @@
     <script src="js/crypto.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/keygen.js"></script>
     <script src="js/app.js"></script>
   </head>
   <body>
@@ -42,6 +43,24 @@
 
     <div id="main" class="hidden">
       Welcome to the world of tomorrow!
+    </div>
+
+    <div id="keygen" class="hidden">
+      <button id="keygen-generate">Generate password and key</button>
+      <p class="info">
+        Save your password reliably (for example using a password manager
+        like 1Password) and don't ever share it with anyone.
+      </p>
+      Password<br/>
+      <input type="text" class="big" readonly id="keygen-password" />
+      <p class="info">
+        Send the content of the textarea below to the moderator.
+        It's not confidential but it's important that the public
+        key in the system is this one as it will be used to
+        verify your signatures and encrypt information sent to you.
+      </p>
+      Public information (for moderator)<br/>
+      <textarea readonly id="keygen-public-info"></textarea>
     </div>
 
   </body>
