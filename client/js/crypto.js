@@ -10,6 +10,7 @@
 
     crypto.sha256 = window.SHA256; // From internals of cryptico.
 
+    crypto.keySize = 1024;
     crypto.keyPair = null;
     crypto.publicKey = null;
 

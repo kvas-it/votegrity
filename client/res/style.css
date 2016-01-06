@@ -19,7 +19,7 @@ input, button, textarea {
 
 textarea {
     width: 600px;
-    height: 200px;
+    height: 150px;
 }
 
 input {
@@ -51,7 +51,7 @@ a.menu-item:hover {
     background: white;
 }
 
-#keygen {
+#keygen, #mod-main, #mod-keys, #cnt-main, #vot-main {
     margin-left: 50px;
     margin-top: 50px;
 }
