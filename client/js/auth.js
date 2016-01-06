@@ -94,8 +94,7 @@
             onEnter: function () {
                 $('#password-input').val('');
             },
-            divs: ['auth-form'],
-            menu: [{name: 'Key generator', state: 'keygen'}]
+            divs: ['auth-form']
         });
         $('#login-form').submit(function (ev) {
             auth.loginSubmit();

@@ -2,14 +2,17 @@
  * Votegrity client main module.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
 
-    var registry = global.registry;
     var auth = registry.auth;
+    var ui = registry.ui;
 
     $(document).ready(function () {
         auth.init();
+        if (window.location.href.indexOf('/keygen') !== -1) {
+            ui.switchToState('keygen');
+        }
     });
-})(this);
+})(this.registry);

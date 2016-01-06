@@ -25,10 +25,7 @@
 
     $(document).ready(function () {
         $('#keygen-generate').click(keygen.uiGenerate);
-        ui.addSwitchableState('keygen', {
-            divs: ['keygen'],
-            menu: [{name: 'Back to login form', state: 'auth-form'}]
-        });
+        ui.addSwitchableState('keygen', {divs: ['keygen']});
     });
 
 })(this.registry);
