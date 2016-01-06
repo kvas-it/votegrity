@@ -23,14 +23,18 @@ describe('Auth module', function () {
     it('should log in with good password', function () {
         return auth.uiAuthenticate('123').then(function () {
             ui.currentState.should.be.eql('main');
+            $('#user-info').html().should.be.eql('Logged in as A (moderator)');
+            $('#logout-button').css('display').should.be.eql('inline-block');
         });
     });
 
     it('should not log in with bad password', function () {
         mocking.mock('console.log');
         return auth.uiAuthenticate('321').then(function () {
-            ui.currentState.should.be.eql('auth-form');
             mocking.unmock('console.log');
+            ui.currentState.should.be.eql('auth-form');
+            $('#user-info').html().should.be.eql('Anonymous');
+            $('#logout-button').css('display').should.be.eql('none');
         });
     });
 });

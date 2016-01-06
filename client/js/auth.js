@@ -32,6 +32,7 @@
                 auth.user = users.filter(function (u) {
                     return u.htoken === auth.htoken;
                 })[0];
+                auth.displayUser();
                 if (!auth.user) {
                     throw Error('Unknown user');
                 }
@@ -55,8 +56,37 @@
             });
     };
 
+    /* Show current user in the UI. */
+    auth.displayUser = function () {
+        if (auth.user) {
+            $('#logout-button').show();
+            $('#user-info').html(
+                    'Logged in as ' + auth.user.name +
+                    ' (' + auth.user.role + ')');
+        } else {
+            $('#logout-button').hide();
+            $('#user-info').html('Anonymous');
+        }
+    };
+
     /* Handle login form submit. */
     auth.loginSubmit = function () {
-        return auth.uiAuthenticate($('#password-input').value);
+        return auth.uiAuthenticate($('#password-input').val());
     };
+
+    /* Log out current user. */
+    auth.logoutSubmit = function () {
+        auth.password = auth.token = auth.htoken = auth.user = undefined;
+        store.setAccessToken('');
+        auth.displayUser();
+        ui.switchToState('auth-form');
+    };
+
+    $(document).ready(function () {
+        $('#login-form').submit(function (ev) {
+            auth.loginSubmit();
+            ev.preventDefault();
+        });
+        $('#logout-button').click(auth.logoutSubmit);
+    });
 })(this);

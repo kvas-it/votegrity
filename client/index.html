@@ -3,8 +3,12 @@
   <head>
     <base href="/" />
     <style type="text/css">
-.hidden {
-    display: none;
+.hidden {display: none;};
+.right {float: right;};
+
+#navbar {
+    width: 100%;
+    border-bottom: 1px solid grey;
 };
     </style>
     <title>Votegrity</title>
@@ -19,6 +23,13 @@
     <script src="js/app.js"></script>
   </head>
   <body>
+    <div id="navbar">
+      <div id="user" class="right">
+        <span id="user-info">Anonymous</span>
+        <button id="logout-button" class="hidden">log out</button>
+      </div>
+      <div id="menu"></div>
+    </div>
 
     <div id="error" class="hidden">
       <span id="error-message"></span>
@@ -28,13 +39,17 @@
       Loading...
     </div>
 
-    <!-- Part: log in form -->
     <div id="auth-form" class="hidden">
-      Password
-      <input type="text" name="auth-token" id="password-input" />
-      <button onclick="registry.ui.loginSubmit">submit</button>
+      Enter password to log in
+      <form id="login-form" action="#">
+        <input type="password" name="password" id="password-input" />
+        <button id="login-button">submit</button>
+      </form>
     </div>
-    <!-- /Part -->
+
+    <div id="main" class="hidden">
+      Welcome to the world of tomorrow!
+    </div>
 
   </body>
 </html>

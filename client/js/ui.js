@@ -15,7 +15,7 @@
     ui.switchableStates = {
         'auth-form': ['auth-form'],
         loading: ['loading'],
-        main: []
+        main: ['main']
     };
     ui.currentState = 'loading';
 
