@@ -20,6 +20,7 @@ function attachStore(app) {
 
 function install(app) {
     app.use('/js', express.static(app.get('clientRoot') + '/js'));
+    app.use('/res', express.static(app.get('clientRoot') + '/res'));
     app.use('/cr', express.static(app.get('componentsRoot') + '/cryptico'));
     app.use('/jq', express.static(app.get('componentsRoot') + '/jquery/dist'));
     app.use('/ap', express.static(app.get('componentsRoot') + '/ayepromise'));
