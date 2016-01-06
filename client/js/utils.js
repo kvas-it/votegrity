@@ -2,17 +2,14 @@
  * General utils.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
 
-    var registry = global.registry || {};
-    global.registry = registry;
-
     var utils = registry.utils = {};
 
-    /* Extract access token from URL and remove it from location. */
-    utils.extractAccessTokenFromUrl = function () {
+    /* Extract password from URL and remove it from location. */
+    utils.extractPasswordFromUrl = function () {
         var url = window.location.href;
         var parts = url.split('?');
         var base = parts[0];
@@ -54,4 +51,4 @@
         });
     };
 
-})(this);
+})(this.registry);

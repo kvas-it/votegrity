@@ -2,12 +2,9 @@
  * Authentication and access token tracking.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
-
-    var registry = global.registry || {};
-    global.registry = registry;
 
     var crypto = registry.crypto;
     var store = registry.store;
@@ -82,11 +79,28 @@
         ui.switchToState('auth-form');
     };
 
+    /* Authenticate with the password from URL or display login form. */
+    auth.init = function () {
+        var token = utils.extractPasswordFromUrl();
+        if (token !== undefined) {
+            return auth.uiAuthenticate(token);
+        } else {
+            ui.switchToState('auth-form');
+        }
+    };
+
     $(document).ready(function () {
+        ui.addSwitchableState('auth-form', {
+            onEnter: function () {
+                $('#password-input').val('');
+            },
+            divs: ['auth-form'],
+            menu: [{name: 'Key generator', state: 'keygen'}]
+        });
         $('#login-form').submit(function (ev) {
             auth.loginSubmit();
             ev.preventDefault();
         });
         $('#logout-button').click(auth.logoutSubmit);
     });
-})(this);
+})(this.registry);

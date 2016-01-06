@@ -2,11 +2,10 @@
  * Mocking support for client-side testing.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
 
-    var registry = global.registry;
     var mocking = registry.mocking = {};
 
     mocking.originals = {};
@@ -23,11 +22,17 @@
     }
 
     function getPath(obj, path) {
+        if (path === 'url') {
+            return window.location.href;
+        }
         var t = traverse(obj, path);
         return t.obj[t.key];
     }
 
     function setPath(obj, path, value) {
+        if (path === 'url') {
+            window.history.replaceState('', '', value);
+        }
         var t = traverse(obj, path);
         t.obj[t.key] = value;
     }
@@ -52,4 +57,4 @@
             mocking.unmock(path);
         }
     };
-})(this);
+})(this.registry);

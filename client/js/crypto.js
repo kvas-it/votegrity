@@ -2,12 +2,9 @@
  * Cryptographic utils.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
-
-    var registry = global.registry || {};
-    global.registry = registry;
 
     var crypto = registry.crypto = {};
 
@@ -17,4 +14,4 @@
     crypto.hash = function (plainText) {
         return cryptico.b16to64(crypto.sha256(plainText)).substr(0, 30);
     };
-})(this);
+})(this.registry);

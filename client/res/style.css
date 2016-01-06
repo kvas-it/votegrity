@@ -29,4 +29,5 @@ input, button {
 #error {
     color: red;
     padding: 10px;
+    display: none;
 }

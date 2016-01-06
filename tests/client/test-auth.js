@@ -20,6 +20,13 @@ describe('Auth module', function () {
 
     afterEach(mocking.unmockAll);
 
+    it('should log in with password from url', function () {
+        mocking.mock('url', 'http://a/b?&auth=123');
+        return auth.init().then(function () {
+            ui.currentState.should.be.eql('main');
+        });
+    });
+
     it('should log in with good password', function () {
         return auth.uiAuthenticate('123').then(function () {
             ui.currentState.should.be.eql('main');

@@ -2,29 +2,26 @@
  * Client for the votegrity server-side key-value store.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
 
-    var registry = global.registry || {};
-    global.registry = registry;
-
-    var accessToken;
-    var baseUrl = '';
-
     var store = registry.store = {};
 
+    store.accessToken = '';
+    store.baseUrl = '';
+
     store.setAccessToken = function (token) {
-        accessToken = token;
+        store.accessToken = token;
     };
 
     store.setBaseUrl = function (url) {
-        baseUrl = url;
+        store.baseUrl = url;
     };
 
     function apiCall(params) {
 
-        params.accessToken = accessToken;
+        params.accessToken = store.accessToken;
         var deferred = ayepromise.defer();
 
         function ajaxSuccess(data, status) {
@@ -48,7 +45,7 @@
 
         $.ajax({
             type:'POST',
-            url: baseUrl + '/api/store',
+            url: store.baseUrl + '/api/store',
             contentType: 'application/json',
             data: JSON.stringify(params),
             success: ajaxSuccess,
@@ -66,4 +63,4 @@
         return apiCall({method: 'write', key: key, value: value})
             .then(function () {return true;});
     };
-})(this);
+})(this.registry);

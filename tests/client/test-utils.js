@@ -6,21 +6,14 @@ describe('Utils', function () {
 
     'use strict';
 
+    var mocking = window.registry.mocking;
     var utils = window.registry.utils;
 
-    function setUrl(url) {
-        window.history.replaceState('', '', url);
-    }
+    after(mocking.unmockAll);
 
-    var savedUrl = window.location.href;
-
-    after(function () {
-        setUrl(savedUrl);
-    });
-
-    it('should extract access token from url', function () {
-        setUrl('http://a/b?x=y&auth=abc&a=b');
-        var got = utils.extractAccessTokenFromUrl();
+    it('should extract password from url', function () {
+        mocking.mock('url', 'http://a/b?x=y&auth=abc&a=b');
+        var got = utils.extractPasswordFromUrl();
         got.should.be.eql('abc');
         window.location.href.should.be.eql('http://a/b');
     });

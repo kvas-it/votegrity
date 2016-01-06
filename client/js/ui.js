@@ -2,35 +2,39 @@
  * Votegrity ui utilities.
  */
 
-(function (global) {
+(function (registry) {
 
     'use strict';
 
-    var registry = global.registry || {};
-    global.registry = registry;
-
     var ui = registry.ui = {};
 
-    ui.switchableDivs = ['auth-form', 'loading'];
-    ui.switchableStates = {
-        'auth-form': ['auth-form'],
-        loading: ['loading'],
-        main: ['main']
+    ui.switchableDivs = [];
+    ui.switchableStates = {};
+
+    ui.addSwitchableState = function (state, config) {
+        ui.switchableStates[state] = config;
+        config.divs.forEach(function (div) {
+            if (ui.switchableDivs.indexOf(div) === -1) {
+                ui.switchableDivs.push(div);
+            }
+        });
     };
-    ui.currentState = 'loading';
 
     ui.switchToState = function (state) {
         if (state in ui.switchableStates) {
             ui.currentState = state;
-            var stateDivs = ui.switchableStates[state];
-            ui.switchableDivs.forEach(function (divId) {
-                var div = $('#' + divId);
-                if (stateDivs.indexOf(divId) === -1) {
-                    div.hide();
+            var stateConfig = ui.switchableStates[state];
+            ui.switchableDivs.forEach(function (div) {
+                var jqDiv = $('#' + div);
+                if (stateConfig.divs.indexOf(div) === -1) {
+                    jqDiv.hide();
                 } else {
-                    div.show();
+                    jqDiv.show();
                 }
             });
+            if (stateConfig.onEnter) {
+                stateConfig.onEnter();
+            }
         }
     };
 
@@ -51,4 +55,10 @@
     ui.hideError = function () {
         $('#error').hide();
     };
-})(this);
+
+    $(document).ready(function () {
+        ui.addSwitchableState('loading', {divs: ['loading']});
+        ui.addSwitchableState('main', {divs: ['main']});
+        ui.switchToState('loading');
+    });
+})(this.registry);
