@@ -3,13 +3,38 @@
   <head>
     <base href="/" />
     <style type="text/css">
-.hidden {display: none;};
-.right {float: right;};
+body {
+    margin: 0;
+    font-family: Arial;
+}
+
+div {
+    box-sizing: border-box;
+}
+
+input, button {
+    font-size: 100%;
+}
+
+.hidden {display: none;}
+.right {float: right;}
 
 #navbar {
     width: 100%;
     border-bottom: 1px solid grey;
-};
+    background: #ccf;
+    padding: 10px;
+}
+
+#auth-form {
+    margin-left: 100px;
+    margin-top: 100px;
+}
+
+#error {
+    color: red;
+    padding: 10px;
+}
     </style>
     <title>Votegrity</title>
     <script src="cr/cryptico.js"></script>
@@ -28,7 +53,7 @@
         <span id="user-info">Anonymous</span>
         <button id="logout-button" class="hidden">log out</button>
       </div>
-      <div id="menu"></div>
+      <div id="menu">&nbsp;</div>
     </div>
 
     <div id="error" class="hidden">
@@ -40,8 +65,8 @@
     </div>
 
     <div id="auth-form" class="hidden">
-      Enter password to log in
       <form id="login-form" action="#">
+        Enter password to log in
         <input type="password" name="password" id="password-input" />
         <button id="login-button">submit</button>
       </form>
