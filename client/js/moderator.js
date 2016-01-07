@@ -20,21 +20,24 @@
         status.html(' (loading...)');
         return store.read(key)
             .then(function (data) {
-                    status.html('');
-                    target.val(data);
-                    target.attr('readonly', true);
-                },
-                function fail(err) {
-                    if (err.message === 'Missing key: ' + key) {
-                        status.html(' (missing)');
-                        button.show();
-                        button.click(function () {
-                            savePK(key, targetId);
-                        });
-                    } else {
-                        ui.reportError(err);
-                    }
-                });
+                status.html('');
+                target.val(data);
+                target.attr('disabled', true);
+            },
+            function fail(err) {
+                if (err.message === 'Missing key: ' + key) {
+                    status.html(' (missing)');
+                    target.val('');
+                    target.attr('disabled', false);
+                    button.show();
+                    button.click(function () {
+                        savePK(key, targetId);
+                    });
+                } else {
+                    status.html(' (loading failed)');
+                    ui.reportError(err);
+                }
+            });
     }
 
     /* Save private key from the textarea. */
@@ -49,15 +52,22 @@
 
         status.html(' (saving...)');
         button.hide();
-        return store.write(key, target.val()).then(function () {
-            status.html('');
-            target.attr('readonly', true);
-        },
-        function fail(err) {
-            ui.reportError(err);
-            button.show();
-            status.html(' (save failed)');
-        });
+        return store.write(key, target.val())
+            .then(function () {
+                status.html('');
+                target.attr('disabled', true);
+            },
+            function fail(err) {
+                ui.reportError(err);
+                button.show();
+                status.html(' (save failed)');
+            })
+            .then(function () {
+                return store.write(key + '.acl', 'counter:read\nvoter:read');
+            })
+            .fail(function (err) {
+                ui.reportError(err);
+            });
     }
 
     /* Load moderator and counter keys from the server. */
