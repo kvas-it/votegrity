@@ -37,8 +37,9 @@
     };
 
     ui.stateSwitcher = function (state) {
-        return function () {
+        return function (ev) {
             ui.switchToState(state);
+            ev.preventDefault();
         };
     };
 
