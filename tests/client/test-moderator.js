@@ -77,4 +77,13 @@ describe('Moderator UI', function () {
             storeData['init-passwords'].should.startWith('5:xxx\n9:');
         });
     });
+
+    it('should detect duplicate emails', function () {
+        mocking.mock('console.log');
+        storeData.users = list2;
+        $('#new-voters').val('X:b@c.d');
+        return mod.addVoters().then(function () {
+            $('#error-message').html().should.be.eql('Duplicate email: b@c.d');
+        });
+    });
 });

@@ -134,6 +134,11 @@
                 if (v.email.indexOf('@') === -1) {
                     throw Error('Invalid email: ' + v.email);
                 }
+                if (userList.filter(function (u) {
+                        return u.email === v.email;
+                    }).length !== 0) {
+                    throw Error('Duplicate email: ' + v.email);
+                }
                 return v;
             })
             .map(function (v) {
