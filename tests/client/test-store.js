@@ -35,7 +35,7 @@ describe('Store client', function () {
     });
 
     it('should pass the access token', function () {
-        var usersData = 'TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:john@doe.com:John Doe:moderator';
+        var usersData = '1:TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:john@doe.com:John Doe:moderator';
         var accessToken = 'pmWkWSBCL51Bfkhn79xPuKBKHz//H6';
 
         return store.write('users', usersData)

@@ -20,17 +20,17 @@ describe('Key-value store access control', function () {
     var modAT = cu.hash('123'); // Moderator access token.
     var mod = [
         // Moderator user record.
-        cu.hash(modAT), 'alice@mod.org', 'Alice Mod', 'moderator'
+        '1', cu.hash(modAT), 'alice@mod.org', 'Alice Mod', 'moderator'
     ];
     var cntAT = cu.hash('456'); // Counter access token.
     var cnt = [
         // Counter user record.
-        cu.hash(cntAT), 'bob@cnt.org', 'Bob Cnt', 'counter'
+        '2', cu.hash(cntAT), 'bob@cnt.org', 'Bob Cnt', 'counter'
     ];
     var v1AT = cu.hash('789'); // Voter 1 access token.
     var v1 = [
         // Voter 1 user record.
-        cu.hash(v1AT), 'carol@vot.org', 'Carol Vot', 'voter'
+        '3', cu.hash(v1AT), 'carol@vot.org', 'Carol Vot', 'voter'
     ];
 
     var store;

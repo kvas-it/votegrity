@@ -19,10 +19,10 @@ describe('Utils', function () {
     });
 
     it('should parse user list', function () {
-        var userList = '# user list\n\na:b:c:d\ne:f:g:h';
+        var userList = '# user list\n\n1:a:b:c:d\n2:e:f:g:h';
         utils.parseUsersData(userList).should.be.eql([
-            {htoken: 'a', email: 'b', name: 'c', role: 'd'},
-            {htoken: 'e', email: 'f', name: 'g', role: 'h'}
+            {id: '1', htoken: 'a', email: 'b', name: 'c', role: 'd'},
+            {id: '2', htoken: 'e', email: 'f', name: 'g', role: 'h'}
         ]);
     });
 });

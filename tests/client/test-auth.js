@@ -11,9 +11,9 @@ describe('Auth', function () {
     var ui = window.registry.ui;
 
     var users =
-        'TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:alice@mod.org:Alice Mod:moderator\n' +
-        '+T/xCTkR/ysE6GRfQaf4LOV38yfvCZ:bob@cnt.org:Bob Cnt:counter\n' +
-        'U/i4hqAWk4EIKL3CBIXlxK7Xgimepq:carol@vot.org:Carol Vot:voter';
+        '1:TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:alice@mod.org:Alice Mod:moderator\n' +
+        '2:+T/xCTkR/ysE6GRfQaf4LOV38yfvCZ:bob@cnt.org:Bob Cnt:counter\n' +
+        '3:U/i4hqAWk4EIKL3CBIXlxK7Xgimepq:carol@vot.org:Carol Vot:voter';
 
     beforeEach(function () {
         mocking.mock('store.read', function () {

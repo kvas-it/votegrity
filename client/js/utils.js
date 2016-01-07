@@ -43,10 +43,11 @@
         return lines.map(function (line) {
             var fields = line.split(':');
             return {
-                htoken: fields[0],
-                email: fields[1],
-                name: fields[2],
-                role: fields[3]
+                id: fields[0],
+                htoken: fields[1],
+                email: fields[2],
+                name: fields[3],
+                role: fields[4]
             };
         });
     };

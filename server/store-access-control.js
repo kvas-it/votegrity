@@ -23,18 +23,18 @@ StoreAC.prototype.loadAndParse = function (key, fields) {
 };
 
 StoreAC.prototype.loadUsers = function () {
-    return this.loadAndParse('users', ['htoken', 'email', 'name', 'role']);
+    return this.loadAndParse('users', ['id', 'htoken', 'email', 'name', 'role']);
 };
 
 StoreAC.prototype.loadACL = function (key) {
-    return this.loadAndParse(key + '.acl', ['htoken', 'type']);
+    return this.loadAndParse(key + '.acl', ['userOrRole', 'type']);
 };
 
 StoreAC.prototype.checkACL = function (key, type, user) {
     return this.loadACL(key).then((acl) => {
 
-        var lines = _.filter(acl, (l) => l.htoken === user.htoken ||
-                                         l.htoken === user.role);
+        var lines = _.filter(acl, (l) => l.userOrRole === user.id ||
+                                         l.userOrRole === user.role);
         var types = _.map(lines, 'type');
 
         if (types.indexOf(type) !== -1) {
