@@ -8,6 +8,13 @@
 
     var utils = registry.utils = {};
 
+    /* Make a promise that resolves to result. */
+    utils.pResolve = function (result) {
+        var d = ayepromise.defer();
+        d.resolve(result);
+        return d.promise;
+    };
+
     /* Extract password from URL and remove it from location. */
     utils.extractPasswordFromUrl = function () {
         var url = window.location.href;
@@ -34,22 +41,23 @@
         return token;
     };
 
-    /* Parse user data from the server. */
-    utils.parseUsersData = function (data) {
+    /* Parse multiline colon-separated data. */
+    utils.parseData = function (data, fields) {
         var lines = data.split('\n')
-                .filter(function (line) {
-                    return line && line[0] !== '#';
-                });
+            .filter(function (l) {return l && l[0] !== '#';});
         return lines.map(function (line) {
-            var fields = line.split(':');
-            return {
-                id: fields[0],
-                htoken: fields[1],
-                email: fields[2],
-                name: fields[3],
-                role: fields[4]
-            };
+            var ret = {};
+            var values = line.split(':');
+            fields.forEach(function (field, index) {
+                ret[field] = values[index];
+            });
+            return ret;
         });
+    };
+
+    /* Parse user list (). */
+    utils.parseUserList = function (data) {
+        return utils.parseData(data, ['id', 'htoken', 'email', 'name', 'role']);
     };
 
     /* Split data (like a public key) into multiple short lines. */

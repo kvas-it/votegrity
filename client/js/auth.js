@@ -25,7 +25,7 @@
     auth.authenticate = function () {
         return store.read('users')
             .then(function success(usersData) {
-                var users = utils.parseUsersData(usersData);
+                var users = utils.parseUserList(usersData);
                 auth.user = users.filter(function (u) {
                     return u.htoken === auth.htoken;
                 })[0];

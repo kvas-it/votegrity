@@ -6,6 +6,8 @@
 
     'use strict';
 
+    var utils = registry.utils;
+    var crypto = registry.crypto;
     var ui = registry.ui;
     var store = registry.store;
 
@@ -79,6 +81,65 @@
         });
     };
 
+    /* Load voter list. */
+    mod.loadVoterList = function () {
+        var list = $('#mod-voter-list');
+
+        return store.read('users')
+            .then(function (data) {
+                var userList = utils.parseUserList(data);
+                var voterList = userList
+                    .filter(function (u) {return u.role === 'voter';})
+                    .sort(function (a, b) {return Number(a.id) - Number(b.id);});
+                if (voterList.length === 0) {
+                    list.html('<em>no voters</em>');
+                } else {
+                    list.html(voterList.map(function (v) {
+                        return v.id + '. ' + v.name + ' &lt;' + v.email + '&gt;';
+                    }).join('<br/>\n'));
+                }
+            },
+            ui.reportError);
+    };
+
+    /* Create voters and return their user records and passwords. */
+    function createVoters(voters, firstId) {
+        return voters.map(function (v) {
+            var id = String(firstId++);
+            var password = crypto.genToken();
+            var htoken = crypto.hash(crypto.hash(password));
+            return {
+                id: id,
+                password: password,
+                userRec: [id, htoken, v.email, v.name, 'voter'].join(':')
+            };
+        });
+    }
+
+    /* Add voters to the voters list (create accounts). */
+    mod.addVoters = function () {
+        var input = $('#new-voters');
+        var newVoters = utils.parseData(input.val(), ['name', 'email']);
+        if (newVoters.length === 0) {
+            return;
+        }
+
+        return store.read('users')
+            .then(function (data) {
+                var userList = utils.parseUserList(data);
+                var maxId = Math.max.apply(null, userList.map(function (u) {
+                    return Number(u.id);
+                }));
+                var created = createVoters(newVoters, maxId + 1);
+                var records = created.map(function (v) {return v.userRec;});
+                return store.write('users', data + '\n' + records.join('\n'));
+            })
+            .then(function () {
+                input.val('');
+            })
+            .then(mod.loadVoterList, ui.reportError);
+    };
+
     $(document).ready(function () {
         var modMenu = [
             {name: 'Key management', state: 'mod-keys'},
@@ -94,7 +155,12 @@
             onEnter: mod.loadPKs
         });
         ui.addSwitchableState('mod-voters', {
-            divs: ['mod-voters'], menu: modMenu
+            divs: ['mod-voters'],
+            menu: modMenu,
+            onEnter: function () {
+                $('#add-voters').click(mod.addVoters);
+                return mod.loadVoterList();
+            }
         });
         ui.addSwitchableState('mod-ballots', {
             divs: ['mod-ballots'], menu: modMenu

@@ -7,6 +7,7 @@ describe('Auth', function () {
     'use strict';
 
     var mocking = window.registry.mocking;
+    var utils = window.registry.utils;
     var auth = window.registry.auth;
     var ui = window.registry.ui;
 
@@ -17,9 +18,7 @@ describe('Auth', function () {
 
     beforeEach(function () {
         mocking.mock('store.read', function () {
-            var d = ayepromise.defer();
-            d.resolve(users);
-            return d.promise;
+            return utils.pResolve(users);
         });
     });
 

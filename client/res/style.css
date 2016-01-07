@@ -20,6 +20,7 @@ input, button, textarea {
 textarea {
     width: 600px;
     height: 150px;
+    margin: 5px 0px;
 }
 
 input {
@@ -28,6 +29,7 @@ input {
 
 input.big {
     width: 600px;
+    margin: 5px 0px;
 }
 
 .hidden {display: none;}

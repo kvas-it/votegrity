@@ -18,12 +18,16 @@ describe('Utils', function () {
         window.location.href.should.be.eql('http://a/b');
     });
 
-    it('should parse user list', function () {
+    it('should parse data', function () {
         var userList = '# user list\n\n1:a:b:c:d\n2:e:f:g:h';
-        utils.parseUsersData(userList).should.be.eql([
+        var fields = ['id', 'htoken', 'email', 'name', 'role'];
+        var expect = [
             {id: '1', htoken: 'a', email: 'b', name: 'c', role: 'd'},
             {id: '2', htoken: 'e', email: 'f', name: 'g', role: 'h'}
-        ]);
+        ];
+
+        utils.parseUserList(userList).should.be.eql(expect);
+        utils.parseData(userList, fields).should.be.eql(expect);
     });
 });
 
