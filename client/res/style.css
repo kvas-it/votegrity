@@ -62,6 +62,7 @@ a.menu-item:hover {
 }
 
 #error {
+    float: left;
     color: red;
     padding: 10px;
     display: none;

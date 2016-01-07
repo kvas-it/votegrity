@@ -42,6 +42,7 @@
 
     ui.switchToState = function (state) {
         if (state in ui.switchableStates) {
+            ui.hideError();
             ui.currentState = state;
             var stateConfig = ui.switchableStates[state];
             ui.switchableDivs.forEach(function (div) {
@@ -71,10 +72,18 @@
         }
         $('#error-message').html(msg);
         $('#error').show();
+        if (ui.hideErrorTimeout) {
+            clearTimeout(ui.hideErrorTimeout);
+        }
+        ui.hideErrorTimeout = setTimeout(ui.hideError, 20000);
     };
 
     ui.hideError = function () {
         $('#error').hide();
+        if (ui.hideErrorTimeout) {
+            clearTimeout(ui.hideErrorTimeout);
+            ui.hideErrorTimeout = undefined;
+        }
     };
 
     $(document).ready(function () {
