@@ -22,7 +22,9 @@
 
     ui.fillMenu = function (items) {
         $('#menu').html(items.map(function (item) {
-            return '<a class="menu-item" href="#">' + item.name + '</a>';
+            return '<a class="menu-item' +
+                (item.state === ui.currentState ? ' selected' : '') +
+                '" href="#">' + item.name + '</a>';
         }).join('\n') + '&nbsp;');
 
         $('#menu > a').each(function (i, element) {
@@ -41,7 +43,7 @@
     };
 
     ui.switchToState = function (state) {
-        if (state in ui.switchableStates) {
+        if (state in ui.switchableStates && state !== ui.currentState) {
             ui.hideError();
             ui.currentState = state;
             var stateConfig = ui.switchableStates[state];

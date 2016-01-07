@@ -47,11 +47,18 @@ a.menu-item {
     color: black;
 }
 
+a.menu-item.selected {
+    background: #eef;
+}
+
 a.menu-item:hover {
     background: white;
 }
 
-#keygen, #mod-main, #mod-keys, #cnt-main, #vot-main {
+#keygen,
+#mod-main, #mod-keys, #mod-voters, #mod-ballots,
+#cnt-main, #vot-main
+{
     margin-left: 50px;
     margin-top: 50px;
 }
