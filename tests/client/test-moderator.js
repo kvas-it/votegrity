@@ -19,7 +19,11 @@ describe('Moderator UI', function () {
     beforeEach(function () {
         storeData = {};
         mocking.mock('store.read', function (key) {
-            return utils.pResolve(storeData[key]);
+            if (key in storeData) {
+                return utils.pResolve(storeData[key]);
+            } else {
+                return utils.pReject(Error('Missing key: ' + key));
+            }
         });
         mocking.mock('store.write', function (key, data) {
             storeData[key] = data;
@@ -61,7 +65,16 @@ describe('Moderator UI', function () {
             users[4].id.should.be.eql('10');
             $('#mod-voter-list').html().should.startWith(expect2 + '<br>\n');
             $('#new-voters').val().should.be.eql('');
+            storeData['init-passwords'].should.startWith('\n9:');
         });
     });
 
+    it('should add init passwords to existing ones', function () {
+        storeData.users = list2;
+        storeData['init-passwords'] = '5:xxx';
+        $('#new-voters').val('D:d@e.f\nE:e@f.g');
+        return mod.addVoters().then(function () {
+            storeData['init-passwords'].should.startWith('5:xxx\n9:');
+        });
+    });
 });

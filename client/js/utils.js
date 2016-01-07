@@ -15,6 +15,40 @@
         return d.promise;
     };
 
+    /* Make a promise that is rejected with the error. */
+    utils.pReject = function (error) {
+        var d = ayepromise.defer();
+        d.reject(error);
+        return d.promise;
+    };
+
+    /* Wait for multiple promises and return array of results. */
+    utils.pAll = function (promises) {
+        if (promises.length === 0) {
+            return utils.pResolve([]);
+        } else {
+            var last = promises.pop();
+            return utils.pAll(promises).then(function (results) {
+                if (typeof(last.then) !== 'function') {
+                    last = utils.pResolve(last);
+                }
+                return last.then(function (lastResult) {
+                    results.push(lastResult);
+                    return results;
+                });
+            });
+        }
+    };
+
+    /* Join promises. */
+    utils.pJoin = function () {
+        var args = Array.apply(null, arguments);
+        var func = args.pop();
+        return utils.pAll(args).then(function (results) {
+            return func.apply(this, results);
+        });
+    };
+
     /* Extract password from URL and remove it from location. */
     utils.extractPasswordFromUrl = function () {
         var url = window.location.href;

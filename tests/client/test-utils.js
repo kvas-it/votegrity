@@ -29,5 +29,28 @@ describe('Utils', function () {
         utils.parseUserList(userList).should.be.eql(expect);
         utils.parseData(userList, fields).should.be.eql(expect);
     });
+
+    it('should join promises', function () {
+        return utils.pJoin(utils.pResolve(1), 2, utils.pResolve(3),
+            function (a, b, c) {
+                return a + b + c;
+            })
+            .then(function (total) {
+                total.should.be.eql(6);
+            });
+    });
+
+    it('should wait for multiple promises', function () {
+        return utils.pAll([0, utils.pResolve(1), 2, utils.pResolve(3), 4])
+            .then(function (results) {
+                results.should.be.eql([0, 1, 2, 3, 4]);
+            });
+    });
+
+    it('should wait for zero promises', function () {
+        return utils.pAll([]).then(function (results) {
+            results.should.be.eql([]);
+        });
+    });
 });
 

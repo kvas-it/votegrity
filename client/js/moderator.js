@@ -81,16 +81,22 @@
         });
     };
 
-    /* Load voter list. */
-    mod.loadVoterList = function () {
-        var list = $('#mod-voter-list');
-
+    /* Load voter list (return promise). */
+    function getVoterList() {
         return store.read('users')
             .then(function (data) {
                 var userList = utils.parseUserList(data);
-                var voterList = userList
+                return userList
                     .filter(function (u) {return u.role === 'voter';})
                     .sort(function (a, b) {return Number(a.id) - Number(b.id);});
+            });
+    }
+
+    /* Load voter list. */
+    mod.loadVoterList = function () {
+        var list = $('#mod-voter-list');
+        return getVoterList()
+            .then(function (voterList) {
                 if (voterList.length === 0) {
                     list.html('<em>no voters</em>');
                 } else {
@@ -103,36 +109,60 @@
     };
 
     /* Create voters and return their user records and passwords. */
-    function createVoters(voters, firstId) {
-        return voters.map(function (v) {
-            var id = String(firstId++);
-            var password = crypto.genToken();
-            var htoken = crypto.hash(crypto.hash(password));
-            return {
-                id: id,
-                password: password,
-                userRec: [id, htoken, v.email, v.name, 'voter'].join(':')
-            };
-        });
+    function createVoters(votersData, usersData) {
+
+        var votersList = utils.parseData(votersData, ['name', 'email']);
+        if (votersList.length === 0) {
+            throw Error('No voter information supplied');
+        }
+
+        var userList = utils.parseUserList(usersData);
+        var maxId = Math.max.apply(null, userList.map(function (u) {
+            return Number(u.id);
+        }));
+
+        return votersList
+            .map(function adjust(v) {
+                v.name = $.trim(v.name);
+                v.email = $.trim(v.email);
+                if (v.name === '') {
+                    throw Error('Empty name in one of voter records');
+                }
+                if (v.email === '') {
+                    throw Error('Empty email in one of voter records');
+                }
+                if (v.email.indexOf('@') === -1) {
+                    throw Error('Invalid email: ' + v.email);
+                }
+                return v;
+            })
+            .map(function (v) {
+                var id = String(++maxId);
+                var password = crypto.genToken();
+                var htoken = crypto.hash(crypto.hash(password));
+                return {
+                    pwRec: [id, password].join(':'),
+                    userRec: [id, htoken, v.email, v.name, 'voter'].join(':')
+                };
+            });
     }
 
     /* Add voters to the voters list (create accounts). */
     mod.addVoters = function () {
         var input = $('#new-voters');
-        var newVoters = utils.parseData(input.val(), ['name', 'email']);
-        if (newVoters.length === 0) {
-            return;
-        }
 
-        return store.read('users')
-            .then(function (data) {
-                var userList = utils.parseUserList(data);
-                var maxId = Math.max.apply(null, userList.map(function (u) {
-                    return Number(u.id);
-                }));
-                var created = createVoters(newVoters, maxId + 1);
+        return utils.pJoin(
+            store.read('users'),
+            store.read('init-passwords')
+                .fail(function () {return '';}),
+            function (usersData, initPWData) {
+                var created = createVoters(input.val(), usersData);
                 var records = created.map(function (v) {return v.userRec;});
-                return store.write('users', data + '\n' + records.join('\n'));
+                var pws = created.map(function (v) {return v.pwRec;});
+                return utils.pAll([
+                    store.write('users', usersData + '\n' + records.join('\n')),
+                    store.write('init-passwords', initPWData + '\n' + pws.join('\n'))
+                ]);
             })
             .then(function () {
                 input.val('');
