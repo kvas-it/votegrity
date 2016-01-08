@@ -13,74 +13,6 @@
 
     var mod = registry.mod = {};
 
-    /* Load private key into the textarea. */
-    function loadPK(key, targetId) {
-        var status = $('#' + targetId + '-status');
-        var button = $('#' + targetId + '-save');
-        var target = $('#' + targetId);
-
-        status.html(' (loading...)');
-        return store.read(key)
-            .then(function (data) {
-                status.html('');
-                target.val(data);
-                target.attr('disabled', true);
-            },
-            function fail(err) {
-                if (err.message === 'Missing key: ' + key) {
-                    status.html(' (missing)');
-                    target.val('');
-                    target.attr('disabled', false);
-                    button.show();
-                    button.click(function () {
-                        savePK(key, targetId);
-                    });
-                } else {
-                    status.html(' (loading failed)');
-                    ui.reportError(err);
-                }
-            });
-    }
-
-    /* Save private key from the textarea. */
-    function savePK(key, targetId) {
-        var status = $('#' + targetId + '-status');
-        var button = $('#' + targetId + '-save');
-        var target = $('#' + targetId);
-
-        if (target.val().length < 100) {
-            return; // Can't be a legitimate key.
-        }
-
-        status.html(' (saving...)');
-        button.hide();
-        return store.write(key, target.val())
-            .then(function () {
-                status.html('');
-                target.attr('disabled', true);
-            },
-            function fail(err) {
-                ui.reportError(err);
-                button.show();
-                status.html(' (save failed)');
-            })
-            .then(function () {
-                return store.write(key + '.acl', 'counter:read\nvoter:read');
-            })
-            .fail(function (err) {
-                ui.reportError(err);
-            });
-    }
-
-    /* Load moderator and counter keys from the server. */
-    mod.loadPKs = function () {
-        var modP = loadPK('key-moderator', 'key-moderator');
-        var cntP = loadPK('key-counter', 'key-counter');
-        return modP.then(function () {
-            return cntP;
-        });
-    };
-
     /* Load voter list (return promise). */
     function getVoterList() {
         return store.read('users')
@@ -185,10 +117,28 @@
                     });
             },
             enable: function () {
-                return store.write(key, 'counter:write');
+                return store.write(key, '*:read\ncounter:write');
             },
             disable: function () {
-                return store.write(key, '');
+                return store.write(key, '*:read');
+            }
+        });
+    }
+
+    /* Activate textbox for editing a public key. */
+    function makeKeyTextBox(keyId) {
+        return new ui.TextBox(keyId, {
+            load: function () {
+                return store.read(keyId, '');
+            },
+            save: function (content) {
+                return utils.pAll([
+                    store.write(keyId, content),
+                    store.write(keyId + '.acl', '*:read')
+                ]);
+            },
+            isDisabled: function (content) {
+                return content.length > 100;
             }
         });
     }
@@ -205,7 +155,14 @@
         ui.addState('mod-keys', {
             divs: ['mod-keys'],
             menu: modMenu,
-            onEnter: mod.loadPKs
+            onEnter: function (scope) {
+                scope.modKey = makeKeyTextBox('key-moderator');
+                scope.cntKey = makeKeyTextBox('key-counter');
+                return utils.pAll([
+                    scope.modKey.load(),
+                    scope.cntKey.load()
+                ]);
+            }
         });
         ui.addState('mod-voters', {
             divs: ['mod-voters'],

@@ -68,16 +68,16 @@
     <div id="mod-keys" class="hidden">
       <h1>Key management</h1>
 
-      <p>
-        Moderator public key<span id="key-moderator-status"></span>
-        <button class="hidden" id="key-moderator-save">save</button><br/>
-        <textarea id="key-moderator"></textarea>
+      <p id="key-moderator">
+        Moderator public key <span id="key-moderator-status"></span>
+        <button id="key-moderator-save">save</button><br/>
+        <textarea id="key-moderator-content"></textarea>
       </p>
 
-      <p>
-        Counter public key<span id="key-counter-status"></span>
-        <button class="hidden" id="key-counter-save">save</button><br/>
-        <textarea id="key-counter"></textarea>
+      <p id="key-counter">
+        Counter public key <span id="key-counter-status"></span>
+        <button id="key-counter-save">save</button><br/>
+        <textarea id="key-counter-content"></textarea>
       </p>
     </div>
 
@@ -107,6 +107,31 @@
     <!-- main state for counter -->
     <div id="cnt-main" class="hidden">
       You're the counter.
+    </div>
+
+
+    <!-- voting details editing -->
+    <div id="cnt-voting" class="hidden">
+      <h1>Voting configuration</h1>
+
+      <p id="voting-descr">
+        General information about the voting <span id="voting-descr-status"></span>
+        <button id="voting-descr-save">save</button><br/>
+        <textarea id="voting-descr-content"></textarea>
+      </p>
+
+    </div>
+
+
+    <!-- ballot issuance -->
+    <div id="cnt-ballots" class="hidden">
+      <h1>Ballots issuance</h1>
+    </div>
+
+
+    <!-- counting -->
+    <div id="cnt-count" class="hidden">
+      <h1>Counting and publishing results</h1>
     </div>
 
 
