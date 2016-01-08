@@ -78,6 +78,10 @@ StoreAC.prototype.accessCheck = function (key, type, accessToken) {
                 return;
             }
 
+            if (type === 'read' && key.substr(key.length - 4) === '.acl') {
+                return;
+            }
+
             return this.checkACL(key, type, user);
         });
 };

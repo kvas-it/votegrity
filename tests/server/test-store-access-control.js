@@ -122,6 +122,14 @@ describe('Key-value store access control', function () {
         ]);
     });
 
+    it('should let anyone read acls', function () {
+        return P.all([
+            ac.read('b.acl', cntAT),
+            ac.write('b.acl', '1', cntAT).then(fail).catch(accessDenied),
+            ac.read('b.acl', v1AT)
+        ]);
+    });
+
     it('should allow writing once', function () {
         return P.all([
             ac.write('c', '1', v1AT),
