@@ -34,7 +34,8 @@ StoreAC.prototype.checkACL = function (key, type, user) {
     return this.loadACL(key).then((acl) => {
 
         var lines = _.filter(acl, (l) => l.userOrRole === user.id ||
-                                         l.userOrRole === user.role);
+                                         l.userOrRole === user.role ||
+                                         l.userOrRole === '*');
         var types = _.map(lines, 'type');
 
         if (types.indexOf(type) !== -1) {
