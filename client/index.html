@@ -60,7 +60,15 @@
 
     <!-- main state for moderator -->
     <div id="mod-main" class="hidden">
-      You're the moderator.
+      <p>
+      You're the moderator of this voting process.
+      Moderator is responsible for
+      entering moderator and counter public keys into the system,
+      entering all users into the system,
+      entering general information and list of options,
+      distributing the ballots,
+      collecting the ballots and passing them to the counter.
+      </p>
     </div>
 
 
@@ -121,19 +129,31 @@
     <div id="mod-ballots" class="hidden">
       <h1>Ballot management</h1>
 
-      <p id="ballot-issuance">Ballot issuance: disabled</p>
+      <p id="ballot-issuance">Ballot issuance status: <em>loading...</em></p>
     </div>
 
 
     <!-- main state for counter -->
     <div id="cnt-main" class="hidden">
-      You're the counter.
+      You're the counter. The counter is responsible for issuing ballots,
+      decrypting ballots and calculating the results of the election.
     </div>
 
 
     <!-- ballot issuance -->
     <div id="cnt-ballots" class="hidden">
       <h1>Ballots issuance</h1>
+
+      <p id="cnt-ballot-issuance">Ballots issuance status: <em>loading...</em></p>
+      <p id="cnt-voters-count">Voters registered: <em>loading...</em></p>
+      <p id="cnt-ballots-count">Ballots issued: <em>loading...</em></p>
+
+      <button class="hidden" id="cnt-issue-ballots">issue ballots</button>
+
+      <div class="hidden" id="cnt-issuance">
+        <p id="cnt-ballots-to-issue-count">Ballots to issue: ?</p>
+        <button id="cnt-issue-ballots-2">Confirm issuance</button>
+      </div>
     </div>
 
 
