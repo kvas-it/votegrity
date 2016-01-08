@@ -97,11 +97,30 @@
     </div>
 
 
+    <!-- voting details editing -->
+    <div id="mod-voting-info" class="hidden">
+      <h1>Voting configuration</h1>
+
+      <p id="voting-descr">
+        General information about the voting
+        <span id="voting-descr-status"></span>
+        <button id="voting-descr-save">save</button><br/>
+        <textarea id="voting-descr-content"></textarea>
+      </p>
+
+      <p id="voting-options">
+        List of voting options (one per line)
+        <span id="voting-options-status"></span>
+        <button id="voting-options-save">save</button><br/>
+        <textarea id="voting-options-content"></textarea>
+      </p>
+    </div>
+
+
     <!-- ballot distribution and collection-->
     <div id="mod-ballots" class="hidden">
       <h1>Ballot management</h1>
 
-      <p id="voting-descr-edit">Voting description editing: disabled</p>
       <p id="ballot-issuance">Ballot issuance: disabled</p>
     </div>
 
@@ -109,19 +128,6 @@
     <!-- main state for counter -->
     <div id="cnt-main" class="hidden">
       You're the counter.
-    </div>
-
-
-    <!-- voting details editing -->
-    <div id="cnt-voting" class="hidden">
-      <h1>Voting configuration</h1>
-
-      <p id="voting-descr">
-        General information about the voting <span id="voting-descr-status"></span>
-        <button id="voting-descr-save">save</button><br/>
-        <textarea id="voting-descr-content"></textarea>
-      </p>
-
     </div>
 
 

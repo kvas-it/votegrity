@@ -106,7 +106,7 @@
     };
 
     /* Make permission switch that enables counter to edit a file. */
-    function makeCounterACLSwitch(id, key) {
+    function makeACLSwitch(id, key) {
         return new ui.Switch(id, {
             load: function () {
                 return store.read(key, '')
@@ -123,8 +123,8 @@
         });
     }
 
-    /* Activate textbox for editing a public key. */
-    function makeKeyTextBox(keyId) {
+    /* Make a textbox that is connected to a storage key. */
+    function makeStorageConnectedTextBox(keyId, isDisabled) {
         return new ui.TextBox(keyId, {
             load: function () {
                 return store.read(keyId, '');
@@ -135,9 +135,26 @@
                     store.write(keyId + '.acl', '*:read')
                 ]);
             },
-            isDisabled: function (content) {
-                return content.length > 100;
-            }
+            isDisabled: isDisabled
+        });
+    }
+
+    /* Make a textbox for editing voting info. */
+    function makeVotingInfoBox(keyId) {
+        return makeStorageConnectedTextBox(keyId, function () {
+            /* When counter can issue ballots, voting info can't be edited. */
+            return store.read('ballots.acl', '')
+                .then(function (acl) {
+                    return acl.indexOf('counter:write') !== -1;
+                });
+        });
+    }
+
+    /* Make a textbox for editing a public key. */
+    function makeKeyBox(keyId) {
+        return makeStorageConnectedTextBox(keyId, function (content) {
+            /* Once the key is entered we don't want to change it. */
+            return content.length > 100;
         });
     }
 
@@ -145,6 +162,7 @@
         var modMenu = [
             {name: 'Key management', state: 'mod-keys'},
             {name: 'Voter list', state: 'mod-voters'},
+            {name: 'Voting configuration', state: 'mod-voting-info'},
             {name: 'Ballot management', state: 'mod-ballots'}
         ];
         ui.addState('mod-main', {
@@ -154,11 +172,23 @@
             divs: ['mod-keys'],
             menu: modMenu,
             onEnter: function (scope) {
-                scope.modKey = makeKeyTextBox('key-moderator');
-                scope.cntKey = makeKeyTextBox('key-counter');
+                scope.modKey = makeKeyBox('key-moderator');
+                scope.cntKey = makeKeyBox('key-counter');
                 return utils.pAll([
                     scope.modKey.load(),
                     scope.cntKey.load()
+                ]);
+            }
+        });
+        ui.addState('mod-voting-info', {
+            divs: ['mod-voting-info'],
+            menu: modMenu,
+            onEnter: function (scope) {
+                scope.votingDescr = makeVotingInfoBox('voting-descr');
+                scope.votingOptions = makeVotingInfoBox('voting-options');
+                return utils.pAll([
+                    scope.votingDescr.load(),
+                    scope.votingOptions.load()
                 ]);
             }
         });
@@ -183,14 +213,8 @@
             divs: ['mod-ballots'],
             menu: modMenu,
             onEnter: function (scope) {
-                scope.votingDescrSwitch = makeCounterACLSwitch(
-                    'voting-descr-edit', 'voting-descr.acl');
-                scope.ballotIssuanceSwitch = makeCounterACLSwitch(
-                    'ballot-issuance', 'ballots.acl');
-                return ui.pAll([
-                    scope.votingDescrSwitch.load(),
-                    scope.ballotIssuanceSwitch.load()
-                ]);
+                scope.biSwitch = makeACLSwitch('ballot-issuance', 'ballots.acl');
+                return scope.biSwitch.load();
             }
         });
     });

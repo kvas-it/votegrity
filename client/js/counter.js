@@ -10,16 +10,11 @@
 
     $(document).ready(function () {
         var cntMenu = [
-            {name: 'Vote configuration', state: 'cnt-voting'},
             {name: 'Ballots issuance', state: 'cnt-ballots'},
             {name: 'Counting and publishing results', state: 'cnt-count'}
         ];
         ui.addState('cnt-main', {
             divs: ['cnt-main'],
-            menu: cntMenu
-        });
-        ui.addState('cnt-voting', {
-            divs: ['cnt-voting'],
             menu: cntMenu
         });
         ui.addState('cnt-ballots', {

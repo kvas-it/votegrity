@@ -58,8 +58,8 @@ a.menu-item:hover {
 }
 
 #keygen,
-#mod-main, #mod-keys, #mod-voters, #mod-ballots,
-#cnt-main, #cnt-voting, #cnt-ballots, #cnt-count,
+#mod-main, #mod-keys, #mod-voting-info, #mod-voters, #mod-ballots,
+#cnt-main, #cnt-ballots, #cnt-count,
 #vot-main
 {
     margin-left: 40px;
