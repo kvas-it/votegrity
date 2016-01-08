@@ -48,6 +48,59 @@
         return this.config.disable().then(this.load.bind(this));
     };
 
+    ui.TextBox = function (id, config) {
+        this.id = id;
+        this.status = $('#' + id + '-status');
+        this.saveButton = $('#' + id + '-save');
+        this.saveButton.click(function () {
+            this.save();
+        }.bind(this));
+        this.textarea = $('#' + id + '-content');
+        this.config = config;
+    };
+
+    ui.TextBox.prototype.load = function () {
+        var self = this;
+        self.status.html('(loading...)');
+        return self.config.load()
+            .then(function (content) {
+                self.textarea.val(content || '');
+                self.status.html('(checking access...)');
+                return self.config.isDisabled(content || '')
+                    .then(function (dis) {
+                        self.textarea.attr('disabled', dis ? true : false);
+                        self.saveButton.css('display',
+                            dis ? 'none' : 'inline-block');
+
+                        if (content === undefined) {
+                            self.status.html('(missing)');
+                        } else if (dis) {
+                            self.status.html('(read only)');
+                        } else {
+                            self.status.html('');
+                        }
+                    });
+            })
+            .fail(function (err) {
+                ui.reportError(err);
+                self.status.html('(load failed)');
+                self.saveButton.css('display', 'inline-block');
+            });
+    };
+
+    ui.TextBox.prototype.save = function () {
+        var self = this;
+        self.saveButton.css('display', 'none');
+        self.status.html('(saving...)');
+        return self.config.save(self.textarea.val())
+            .then(self.load.bind(self))
+            .fail(function (err) {
+                ui.reportError(err);
+                self.status.html('(save failed)');
+                self.saveButton.css('display', 'inline-block');
+            });
+    };
+
     ui.stateDivs = [];
     ui.states = {};
 
