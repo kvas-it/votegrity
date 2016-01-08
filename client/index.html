@@ -86,12 +86,14 @@
     <div id="mod-voters" class="hidden">
       <h1>Voter list</h1>
 
-      <div id="mod-voter-list"><em>loading...</em></div>
+      <div id="mod-voter-list"></div>
 
-      <p>&nbsp;</p>
-      Add voters (format of voter records is NAME:E-MAIL)<br/>
-      <textarea id="new-voters"></textarea><br/>
-      <button id="add-voters">add voters</button>
+      <p id="new-voters">
+        <button id="new-voters-save">add voters</button>
+        <span id="new-voters-status"></span>
+        <em>format of voter records is NAME:E-MAIL</em><br/>
+        <textarea id="new-voters-content"></textarea><br/>
+      </p>
     </div>
 
 

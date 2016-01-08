@@ -36,8 +36,7 @@
                         return v.id + '. ' + v.name + ' &lt;' + v.email + '&gt;';
                     }).join('<br/>\n'));
                 }
-            },
-            ui.reportError);
+            });
     };
 
     /* Create voters and return their user records and passwords. */
@@ -53,6 +52,11 @@
             return Number(u.id);
         }));
 
+        var existingEmails = {};
+        userList.forEach(function (u) {
+            existingEmails[u.email] = 1;
+        });
+
         return votersList
             .map(function adjust(v) {
                 v.name = $.trim(v.name);
@@ -66,11 +70,10 @@
                 if (v.email.indexOf('@') === -1) {
                     throw Error('Invalid email: ' + v.email);
                 }
-                if (userList.filter(function (u) {
-                        return u.email === v.email;
-                    }).length !== 0) {
+                if (v.email in existingEmails) {
                     throw Error('Duplicate email: ' + v.email);
                 }
+                existingEmails[v.email] = 1;
                 return v;
             })
             .map(function (v) {
@@ -85,26 +88,21 @@
     }
 
     /* Add voters to the voters list (create accounts). */
-    mod.addVoters = function () {
-        var input = $('#new-voters');
-
+    mod.addVoters = function (votersData) {
         return utils.pJoin(
             store.read('users'),
             store.read('init-passwords')
                 .fail(function () {return '';}),
+            utils.pDelay(0),
             function (usersData, initPWData) {
-                var created = createVoters(input.val(), usersData);
+                var created = createVoters(votersData, usersData);
                 var records = created.map(function (v) {return v.userRec;});
                 var pws = created.map(function (v) {return v.pwRec;});
                 return utils.pAll([
                     store.write('users', usersData + '\n' + records.join('\n')),
                     store.write('init-passwords', initPWData + '\n' + pws.join('\n'))
                 ]);
-            })
-            .then(function () {
-                input.val('');
-            })
-            .then(mod.loadVoterList, ui.reportError);
+            });
     };
 
     /* Make permission switch that enables counter to edit a file. */
@@ -167,9 +165,18 @@
         ui.addState('mod-voters', {
             divs: ['mod-voters'],
             menu: modMenu,
-            onEnter: function () {
-                $('#add-voters').click(mod.addVoters);
-                return mod.loadVoterList();
+            onEnter: function (scope) {
+                scope.newVoters = new ui.TextBox('new-voters', {
+                    load: function () {
+                        return mod.loadVoterList()
+                            .then(function () {return '';});
+                    },
+                    save: mod.addVoters,
+                    isDisabled: function () {
+                        return false;
+                    }
+                });
+                return scope.newVoters.load();
             }
         });
         ui.addState('mod-ballots', {

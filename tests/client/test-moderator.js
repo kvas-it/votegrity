@@ -8,7 +8,7 @@ describe('Moderator UI', function () {
 
     var mocking = window.registry.mocking;
     var utils = window.registry.utils;
-    var mod = window.registry.mod;
+    var ui = window.registry.ui;
 
     var list0 = '1:x:a@b.c:A:moderator';
     var expect0 = '<em>no voters</em>';
@@ -31,32 +31,33 @@ describe('Moderator UI', function () {
         });
         $('#stuff').html(
             '<div id="mod-voter-list"></div>' +
-            '<textarea id="new-voters"></textarea>');
+            '<p id="new-voters"><textarea id="new-voters-content"></textarea></p>');
+        ui.setState('loading');
     });
 
-    afterEach(function () {
-        mocking.unmockAll();
-        $('#stuff').html('');
-    });
+    afterEach(mocking.unmockAll);
 
     it('should load voters list', function () {
         storeData.users = list2;
-        return mod.loadVoterList().then(function () {
+        return ui.setState('mod-voters').then(function () {
             $('#mod-voter-list').html().should.be.eql(expect2);
         });
     });
 
     it('should load empty voters list', function () {
         storeData.users = list0;
-        return mod.loadVoterList().then(function () {
+        return ui.setState('mod-voters').then(function () {
             $('#mod-voter-list').html().should.be.eql(expect0);
         });
     });
 
     it('should add voters to the list', function () {
         storeData.users = list2;
-        $('#new-voters').val('D:d@e.f\nE:e@f.g');
-        return mod.addVoters().then(function () {
+        return ui.setState('mod-voters').then(function () {
+            $('#new-voters-content').val('D:d@e.f\nE:e@f.g');
+            return ui.currentStateScope.newVoters.save();
+        })
+        .then(function () {
             var users = utils.parseUserList(storeData.users);
             users.length.should.be.eql(5);
             users[3].name.should.be.eql('D');
@@ -64,16 +65,19 @@ describe('Moderator UI', function () {
             users[4].name.should.be.eql('E');
             users[4].id.should.be.eql('10');
             $('#mod-voter-list').html().should.startWith(expect2 + '<br>\n');
-            $('#new-voters').val().should.be.eql('');
+            $('#new-voters-content').val().should.be.eql('');
             storeData['init-passwords'].should.startWith('\n9:');
         });
     });
 
-    it('should add init passwords to existing ones', function () {
-        storeData.users = list2;
+    it('should add init passwords for new users', function () {
         storeData['init-passwords'] = '5:xxx';
-        $('#new-voters').val('D:d@e.f\nE:e@f.g');
-        return mod.addVoters().then(function () {
+        storeData.users = list2;
+        return ui.setState('mod-voters').then(function () {
+            $('#new-voters-content').val('D:d@e.f\nE:e@f.g');
+            return ui.currentStateScope.newVoters.save();
+        })
+        .then(function () {
             storeData['init-passwords'].should.startWith('5:xxx\n9:');
         });
     });
@@ -81,8 +85,10 @@ describe('Moderator UI', function () {
     it('should detect duplicate emails', function () {
         mocking.mock('console.log');
         storeData.users = list2;
-        $('#new-voters').val('X:b@c.d');
-        return mod.addVoters().then(function () {
+        return ui.setState('mod-voters').then(function () {
+            $('#new-voters-content').val('X:b@c.d');
+            return ui.currentStateScope.newVoters.save();
+        }).then(function () {
             $('#error-message').html().should.be.eql('Duplicate email: b@c.d');
         });
     });

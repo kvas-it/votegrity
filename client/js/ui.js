@@ -66,7 +66,7 @@
             .then(function (content) {
                 self.textarea.val(content || '');
                 self.status.html('(checking access...)');
-                return self.config.isDisabled(content || '')
+                return utils.pResolve(self.config.isDisabled(content || ''))
                     .then(function (dis) {
                         self.textarea.attr('disabled', dis ? true : false);
                         self.saveButton.css('display',

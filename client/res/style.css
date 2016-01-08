@@ -59,10 +59,17 @@ a.menu-item:hover {
 
 #keygen,
 #mod-main, #mod-keys, #mod-voters, #mod-ballots,
-#cnt-main, #vot-main
+#cnt-main, #cnt-voting, #cnt-ballots, #cnt-count,
+#vot-main
 {
-    margin-left: 50px;
-    margin-top: 50px;
+    margin-left: 40px;
+    margin-top: 40px;
+}
+
+#mod-voter-list {
+    height: 300px;
+    width: 600px;
+    overflow: auto;
 }
 
 #auth-form {
