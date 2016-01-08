@@ -9,7 +9,7 @@
     var ui = registry.ui;
 
     $(document).ready(function () {
-        ui.addSwitchableState('cnt-main', {divs: ['cnt-main']});
+        ui.addState('cnt-main', {divs: ['cnt-main']});
     });
 
 })(this.registry);

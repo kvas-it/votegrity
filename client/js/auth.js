@@ -45,11 +45,11 @@
         return auth.authenticate().then(
             function success() {
                 ui.hideError();
-                ui.switchToState('main');
+                ui.setState('main');
             },
             function error(err) {
                 ui.reportError(err);
-                ui.switchToState('auth-form');
+                ui.setState('auth-form');
             });
     };
 
@@ -76,7 +76,7 @@
         auth.password = auth.token = auth.htoken = auth.user = undefined;
         store.setAccessToken('');
         auth.displayUser();
-        ui.switchToState('auth-form');
+        ui.setState('auth-form');
     };
 
     /* Authenticate with the password from URL or display login form. */
@@ -85,12 +85,12 @@
         if (token !== undefined) {
             return auth.uiAuthenticate(token);
         } else {
-            ui.switchToState('auth-form');
+            ui.setState('auth-form');
         }
     };
 
     $(document).ready(function () {
-        ui.addSwitchableState('auth-form', {
+        ui.addState('auth-form', {
             onEnter: function () {
                 $('#password-input').val('');
             },

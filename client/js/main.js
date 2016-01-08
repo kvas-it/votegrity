@@ -12,7 +12,7 @@
     $(document).ready(function () {
         auth.init();
         if (window.location.href.indexOf('/keygen') !== -1) {
-            ui.switchToState('keygen');
+            ui.setState('keygen');
         }
     });
 })(this.registry);

@@ -25,7 +25,7 @@
 
     $(document).ready(function () {
         $('#keygen-generate').click(keygen.uiGenerate);
-        ui.addSwitchableState('keygen', {divs: ['keygen']});
+        ui.addState('keygen', {divs: ['keygen']});
     });
 
 })(this.registry);

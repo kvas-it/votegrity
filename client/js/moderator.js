@@ -199,15 +199,15 @@
             {name: 'Voter list', state: 'mod-voters'},
             {name: 'Ballot management', state: 'mod-ballots'}
         ];
-        ui.addSwitchableState('mod-main', {
+        ui.addState('mod-main', {
             divs: ['mod-main'], menu: modMenu
         });
-        ui.addSwitchableState('mod-keys', {
+        ui.addState('mod-keys', {
             divs: ['mod-keys'],
             menu: modMenu,
             onEnter: mod.loadPKs
         });
-        ui.addSwitchableState('mod-voters', {
+        ui.addState('mod-voters', {
             divs: ['mod-voters'],
             menu: modMenu,
             onEnter: function () {
@@ -215,7 +215,7 @@
                 return mod.loadVoterList();
             }
         });
-        ui.addSwitchableState('mod-ballots', {
+        ui.addState('mod-ballots', {
             divs: ['mod-ballots'],
             menu: modMenu,
             onEnter: function (scope) {

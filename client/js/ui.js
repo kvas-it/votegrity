@@ -48,14 +48,14 @@
         return this.config.disable().then(this.load.bind(this));
     };
 
-    ui.switchableDivs = [];
-    ui.switchableStates = {};
+    ui.stateDivs = [];
+    ui.states = {};
 
-    ui.addSwitchableState = function (state, config) {
-        ui.switchableStates[state] = config;
+    ui.addState = function (state, config) {
+        ui.states[state] = config;
         config.divs.forEach(function (div) {
-            if (ui.switchableDivs.indexOf(div) === -1) {
-                ui.switchableDivs.push(div);
+            if (ui.stateDivs.indexOf(div) === -1) {
+                ui.stateDivs.push(div);
             }
         });
     };
@@ -70,26 +70,26 @@
         $('#menu > a').each(function (i, element) {
             var item = items[i];
             if (item.state && !item.func) {
-                item.func = ui.stateSwitcher(item.state);
+                item.func = ui.stateSetter(item.state);
             }
             $(element).click(item.func);
         });
     };
 
-    ui.stateSwitcher = function (state) {
+    ui.stateSetter = function (state) {
         return function (ev) {
-            ui.switchToState(state);
+            ui.setState(state);
             ev.preventDefault();
         };
     };
 
-    ui.switchToState = function (state) {
-        if (state in ui.switchableStates && state !== ui.currentState) {
+    ui.setState = function (state) {
+        if (state in ui.states && state !== ui.currentState) {
             ui.hideError();
             ui.currentState = state;
             ui.currentStateScope = {};
-            var stateConfig = ui.switchableStates[state];
-            ui.switchableDivs.forEach(function (div) {
+            var stateConfig = ui.states[state];
+            ui.stateDivs.forEach(function (div) {
                 var jqDiv = $('#' + div);
                 if (stateConfig.divs.indexOf(div) === -1) {
                     jqDiv.hide();
@@ -137,23 +137,23 @@
     };
 
     $(document).ready(function () {
-        ui.addSwitchableState('loading', {divs: ['loading']});
-        ui.addSwitchableState('main', {
+        ui.addState('loading', {divs: ['loading']});
+        ui.addState('main', {
             divs: [],
             onEnter: function () {
                 var user = registry.auth.user;
                 var role = user ? user.role : 'anonymous';
                 if (role === 'moderator') {
-                    ui.switchToState('mod-main');
+                    ui.setState('mod-main');
                 } else if (user.role === 'counter') {
-                    ui.switchToState('cnt-main');
+                    ui.setState('cnt-main');
                 } else if (user.role === 'voter') {
-                    ui.switchToState('vot-main');
+                    ui.setState('vot-main');
                 } else {
-                    ui.switchToState('auth-form');
+                    ui.setState('auth-form');
                 }
             }
         });
-        ui.switchToState('loading');
+        ui.setState('loading');
     });
 })(this.registry);

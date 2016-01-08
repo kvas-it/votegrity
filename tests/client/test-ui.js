@@ -10,7 +10,7 @@ describe('UI', function () {
     var ui = window.registry.ui;
 
     it('should switch states', function () {
-        ui.switchToState('auth-form').then(function (res) {
+        ui.setState('auth-form').then(function (res) {
             res.should.eql(true);
             $('#auth-form').css('display').should.be.eql('block');
             $('#loading').css('display').should.be.eql('none');
@@ -18,19 +18,19 @@ describe('UI', function () {
     });
 
     it('should not switch to missing states', function () {
-        ui.switchToState('missing').then(function (res) {
+        ui.setState('missing').then(function (res) {
             res.should.eql(false);
         });
     });
 
     it('should save state controller', function () {
-        ui.addSwitchableState('withCtl', {
+        ui.addState('withCtl', {
             divs: [],
             onEnter: function (scope) {
                 scope.a = 1;
             }
         });
-        ui.switchToState('withCtl').then(function (res) {
+        ui.setState('withCtl').then(function (res) {
             res.should.eql(true);
             ui.currentStateScope.a.should.be.eql(1);
         });
