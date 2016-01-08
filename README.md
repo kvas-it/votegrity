@@ -156,7 +156,7 @@ Notation:
   * ``VT[i]`` -- Voter token,
   * ``VV[i]`` -- Vote,
   * ``B[i]`` -- Ballot (consisting of a ballot token and information about voting),
-  * ``FB[i]`` -- Filled ballot (``B[i] + SC(VT[i] + VV[i])``),
+  * ``FB[i]`` -- Filled ballot (``B[i] + EC(VT[i] + VV[i])``),
   * ``[X[i]]`` -- the full list of Xs (e.g. all authentication tokens),
 * Encryption and signatures:
   * ``SM(...)`` -- Information signed by moderator,
@@ -165,7 +165,7 @@ Notation:
   * ``EC(...)`` -- Information encrypted with counter's public key,
 * Storage on the server:
   * ``<P>`` -- Information is publicly accessible,
-  * ``<AT[i]>`` -- Information is accessible to those who posses.
+  * ``<AT[i]>`` -- Information is accessible to those who posses the right access token.
   * The storing operations are denoted with arrows,
   * Storing operations in square brackets denote storage of all items of the kind.
 
