@@ -55,8 +55,16 @@
         return deferred.promise;
     }
 
-    store.read = function (key) {
-        return apiCall({method: 'read', key: key});
+    store.read = function (key, default_) {
+        return apiCall({method: 'read', key: key})
+            .fail(function (err) {
+                if (err.message === 'Missing key: ' + key &&
+                        default_ !== undefined) {
+                    return default_;
+                } else {
+                    throw err;
+                }
+            });
     };
 
     store.write = function (key, value) {

@@ -22,6 +22,13 @@
         return d.promise;
     };
 
+    /* Make a promise that resolves in ``delay`` milliseconds. */
+    utils.pDelay = function (delay) {
+        var d = ayepromise.defer();
+        setTimeout(d.resolve, delay);
+        return d.promise;
+    };
+
     /* Wait for multiple promises and return array of results. */
     utils.pAll = function (promises) {
         if (promises.length === 0) {

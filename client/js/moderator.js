@@ -175,6 +175,24 @@
             .then(mod.loadVoterList, ui.reportError);
     };
 
+    /* Make permission switch that enables counter to edit a file. */
+    function makeCounterACLSwitch(id, key) {
+        return new ui.Switch(id, {
+            load: function () {
+                return store.read(key, '')
+                    .then(function (acl) {
+                        return acl.indexOf('counter:write') !== -1;
+                    });
+            },
+            enable: function () {
+                return store.write(key, 'counter:write');
+            },
+            disable: function () {
+                return store.write(key, '');
+            }
+        });
+    }
+
     $(document).ready(function () {
         var modMenu = [
             {name: 'Key management', state: 'mod-keys'},
@@ -198,7 +216,18 @@
             }
         });
         ui.addSwitchableState('mod-ballots', {
-            divs: ['mod-ballots'], menu: modMenu
+            divs: ['mod-ballots'],
+            menu: modMenu,
+            onEnter: function (scope) {
+                scope.votingDescrSwitch = makeCounterACLSwitch(
+                    'voting-descr-edit', 'voting-descr.acl');
+                scope.ballotIssuanceSwitch = makeCounterACLSwitch(
+                    'ballot-issuance', 'ballots.acl');
+                return ui.pAll([
+                    scope.votingDescrSwitch.load(),
+                    scope.ballotIssuanceSwitch.load()
+                ]);
+            }
         });
     });
 

@@ -6,7 +6,47 @@
 
     'use strict';
 
+    var utils = registry.utils;
+
     var ui = registry.ui = {};
+
+    ui.Switch = function (id, config) {
+        this.id = id;
+        this.e_id = id + '-enable';
+        this.d_id = id + '-disable';
+        this.config = config;
+        this.text = $('#' + id).html().split(':')[0];
+    };
+
+    ui.Switch.prototype.load = function () {
+
+        function button(id, text) {
+            return '<button id="' + id + '">' + text + '</button>';
+        }
+
+        return this.config.load()
+            .then(function (state) {
+                var div = $('#' + this.id);
+                if (state) {
+                    div.html(this.text + ': enabled ' +
+                        button(this.d_id, 'disable'));
+                    $('#' + this.d_id).click(this.disable.bind(this));
+                } else {
+                    div.html(this.text + ': disabled ' +
+                        button(this.e_id, 'enable'));
+                    $('#' + this.e_id).click(this.enable.bind(this));
+                }
+
+            }.bind(this));
+    };
+
+    ui.Switch.prototype.enable = function () {
+        return this.config.enable().then(this.load.bind(this));
+    };
+
+    ui.Switch.prototype.disable = function () {
+        return this.config.disable().then(this.load.bind(this));
+    };
 
     ui.switchableDivs = [];
     ui.switchableStates = {};
@@ -47,6 +87,7 @@
         if (state in ui.switchableStates && state !== ui.currentState) {
             ui.hideError();
             ui.currentState = state;
+            ui.currentStateScope = {};
             var stateConfig = ui.switchableStates[state];
             ui.switchableDivs.forEach(function (div) {
                 var jqDiv = $('#' + div);
@@ -58,8 +99,14 @@
             });
             ui.fillMenu(stateConfig.menu || []);
             if (stateConfig.onEnter) {
-                stateConfig.onEnter();
+                return utils.pResolve(stateConfig.onEnter(ui.currentStateScope))
+                    .fail(function (err) {ui.reportError(err);})
+                    .then(function () {return true;});
+            } else {
+                return utils.pResolve(true);
             }
+        } else {
+            return utils.pResolve(false);
         }
     };
 
