@@ -2,3 +2,4 @@ c1435235e2a297d3656e0409939f9f118b5d19a0  node_modules/cryptico/lib/cryptico.js
 4393480e210ea155210ee56d7b626f9bda9198ae  bower_components/cryptico/cryptico.js
 0fed45ad7a48ace869bc725ca474ad86a1ef1562  bower_components/jquery/dist/jquery.js
 c8329f2402ee18f9c3f294f8d4044f5d74d521e5  bower_components/ayepromise/ayepromise.js
+b60c2c301c280378b4d51769cb20a46e65989c73  bower_components/knockout/dist/knockout.js
