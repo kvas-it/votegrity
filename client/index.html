@@ -145,15 +145,15 @@
     <div id="cnt-ballots" class="hidden">
       <h1>Ballots issuance</h1>
 
-      <p id="cnt-ballot-issuance">Ballots issuance status: <em>loading...</em></p>
-      <p id="cnt-voters-count">Voters registered: <em>loading...</em></p>
-      <p id="cnt-ballots-count">Ballots issued: <em>loading...</em></p>
+      <p>Ballots issuance status: <span data-bind="text: status" /></span></p>
+      <p>Voters registered: <span data-bind="text: votersCount"></span></p>
+      <p>Ballots issued: <span data-bind="text: ballotsCount"></span></p>
 
-      <button class="hidden" id="cnt-issue-ballots">issue ballots</button>
+      <button data-bind="visible: canIssue, click: unlock">issue ballots</button>
 
-      <div class="hidden" id="cnt-issuance">
-        <p id="cnt-ballots-to-issue-count">Ballots to issue: ?</p>
-        <button id="cnt-issue-ballots-2">Confirm issuance</button>
+      <div data-bind="visible: unlocked">
+        <p>Ballots to issue: <span data-bind="text: toIssue" /></p>
+        <button data-bind="click: issue">Confirm issuance</button>
       </div>
     </div>
 

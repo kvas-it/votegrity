@@ -12,64 +12,61 @@
 
     var cnt = registry.cnt = {};
 
-    function updateInfo(id, value) {
-        var info = $('#' + id);
-        var title = info.html().split(':')[0];
-        info.html(title + ': ' + value);
-    }
+    cnt.BallotIssuance = function () {
 
-    function loadIssuanceStatus() {
-        return store.read('ballots.acl', '').then(function (acl) {
-            cnt.status = acl.indexOf('counter:write') !== -1 ?
-                        'enabled' :
-                        'disabled';
-            updateInfo('cnt-ballot-issuance', cnt.status);
-        });
-    }
+        this.issuanceEnabled = ko.observable(false);
+        this.votersCount = ko.observable(0);
+        this.ballotsCount = ko.observable(0);
+        this.unlocked = ko.observable(false);
 
-    function loadVotersRegistered() {
+        this.status = ko.computed(function () {
+            return this.issuanceEnabled() ? 'enabled' : 'disabled';
+        }, this);
+
+        this.toIssue = ko.computed(function () {
+            return this.votersCount() - this.ballotsCount();
+        }, this);
+
+        this.canIssue = ko.computed(function () {
+            return this.issuanceEnabled() && (this.toIssue() > 0);
+        }, this);
+    };
+
+    cnt.BallotIssuance.loadVotersCount = function () {
         return store.read('users', '').then(function (userList) {
             var users = utils.parseUserList(userList);
-            cnt.votersCount = users
-                .filter(function (u) {return u.role === 'voter';}).length;
-            updateInfo('cnt-voters-count', cnt.votersCount);
-        });
-    }
-
-    function loadBallotsIssued() {
-        return store.read('ballots', '').then(function (ballots) {
-            cnt.ballotsCount = 0 && ballots;
-            updateInfo('cnt-ballots-count', cnt.ballotsCount);
-        });
-    }
-
-    cnt.initIssuance = function () {
-        return utils.pAll([
-            loadIssuanceStatus(),
-            loadVotersRegistered(),
-            loadBallotsIssued()
-        ]).then(function () {
-            var canIssue = cnt.status === 'enabled' &&
-                    cnt.votersCount > cnt.ballotsCount;
-            updateInfo('cnt-ballots-to-issue-count',
-                cnt.votersCount - cnt.ballotsCount);
-
-            if (canIssue) {
-                $('#cnt-issue-ballots').show();
-            } else {
-                $('#cnt-issue-ballots').hide();
-            }
-            $('#cnt-issuance').hide();
+            return users.filter(function (u) {return u.role === 'voter';}).length;
         });
     };
 
-    function issueBallots() {
-        $('#cnt-issuance').show();
-    }
+    cnt.BallotIssuance.loadBallotsCount = function () {
+        return store.read('ballots', '').then(function (ballots) {
+            return 0 && ballots;
+        });
+    };
 
-    function issueBallots2() {
-        window.alert('yay!');
-    }
+    cnt.BallotIssuance.loadIssuanceEnabled = function () {
+        return store.read('ballots.acl', '').then(function (acl) {
+            return acl.indexOf('counter:write') !== -1;
+        });
+    };
+
+    cnt.BallotIssuance.prototype.load = function () {
+        var self = this;
+        return utils.pAll([
+            self.loadVotersCount().then(self.votersCount),
+            self.loadBallotsCount().then(self.ballotsCount),
+            self.loadIssuanceEnabled().then(self.issuanceEnabled)
+        ]);
+    };
+
+    cnt.BallotIssuance.prototype.unlock = function () {
+        this.unlocked(true);
+    };
+
+    cnt.BallotIssuance.prototype.issue = function () {
+        window.alert('yo!');
+    };
 
     $(document).ready(function () {
         var cntMenu = [
@@ -83,11 +80,10 @@
         ui.addState('cnt-ballots', {
             divs: ['cnt-ballots'],
             menu: cntMenu,
-            onEnter: function () {
-                $('#cnt-issuance').hide();
-                $('#cnt-issue-ballots').click(issueBallots);
-                $('#cnt-issue-ballots-2').click(issueBallots2);
-                return cnt.initIssuance();
+            onEnter: function (scope) {
+                scope.bi = new cnt.BallotIssuance();
+                ko.applyBindings(scope.bi);
+                scope.bi.load();
             }
         });
         ui.addState('cnt-count', {
