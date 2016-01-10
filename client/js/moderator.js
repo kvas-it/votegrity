@@ -160,7 +160,11 @@
 
     mod.Voters = function () {
         return {
-            voters: mod.voterList,
+            votersList: ko.pureComputed(function () {
+                return mod.voterList().map(function (v) {
+                    return v.id + '. ' + v.name + ' &lt;' + v.email + '&gt;';
+                }).join('<br/>\n');
+            }),
             voterAdder: mod.VoterAdder()
         };
     };

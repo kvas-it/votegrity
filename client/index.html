@@ -109,12 +109,8 @@
         <h1>Voter list</h1>
 
         <div id="mod-voter-list">
-          <em data-bind="visible: voters().length === 0">no voters</em>
-          <div data-bind="foreach: voters">
-            <span data-bind="text: id + '.'"></span>
-            <span data-bind="text: name"></span>
-            <span data-bind="text: '<' + email + '>'"></span><br/>
-          </div>
+          <em data-bind="visible: votersList().length === 0">no voters</em>
+          <div data-bind="html: votersList"></div>
         </div>
 
         <p class="info">Note: format of voter records is NAME:E-MAIL.</p>
