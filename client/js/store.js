@@ -71,4 +71,72 @@
         return apiCall({method: 'write', key: key, value: value})
             .then(function () {return true;});
     };
+
+    /* KO model of store key. */
+    store.Key = function (key) {
+
+        var self = {
+            value: ko.observable(),
+            loadedValue: ko.observable(),
+            loading: ko.observable(false),
+            saving: ko.observable(false),
+            error: ko.observable(null)
+        };
+
+        self.load = function () {
+            self.loading(true);
+            self._promise = store.read(key, '')
+                .then(function (value) {
+                    self.value(value);
+                    self.loadedValue(value);
+                    self.loading(false);
+                    self.error(null);
+                })
+                .fail(function (err) {
+                    self.loading(false);
+                    self.error(err.message);
+                });
+            return self._promise;
+        };
+
+        self.save = function () {
+            self.saving(true);
+            self._promise = store.write(key, self.value())
+                .then(function () {
+                    self.saving(false);
+                    return self.load();
+                })
+                .fail(function (err) {
+                    self.saving(false);
+                    self.error(err.message);
+                });
+            return self._promise;
+        };
+
+        self.modified = ko.pureComputed(function () {
+            return self.value() !== self.loadedValue();
+        });
+
+        self.status = ko.pureComputed(function () {
+            if (self.saving()) {
+                return 'saving...';
+            } else if (self.loading()) {
+                return 'loading...';
+            } else if (self.error() === 'Request failed') {
+                return 'disconnected';
+            } else if (self.error() === 'Access denied') {
+                return 'no access';
+            } else if (self.modified()) {
+                return 'modified';
+            } else if (self.value() === undefined) {
+                return 'missing';
+            } else {
+                return '';
+            }
+        });
+
+        self.load();
+        return self;
+    };
+
 })(this.registry);
