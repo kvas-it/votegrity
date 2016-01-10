@@ -10,6 +10,48 @@
 
     var ui = registry.ui = {};
 
+    /*
+     * Add ``activeView`` observable that will autoinstantiate current
+     * view based on ``self.activeViewName()`` and proxy observables
+     * for all the subviews.
+     */
+    ui.setSubViews = function (self, viewMap) {
+
+        self.activeView = ko.pureComputed(function () {
+            var name = self.activeViewName();
+            var constructor = viewMap[name];
+
+            if (constructor) {
+                return constructor(self);
+            }
+        });
+
+        function makeSubviewProxy(name) {
+            return ko.pureComputed(function () {
+                var activeView = self.activeView();
+                if (self.activeViewName() === name) {
+                    return activeView;
+                }
+            });
+        }
+
+        for (var name in viewMap) {
+            self[name] = makeSubviewProxy(name);
+        }
+    };
+
+    /* Make the list of menu items for subviews. */
+    ui.makeMenu = function (self, items) {
+        return ko.observable(items.map(function (item) {
+            return {
+                name: item.name,
+                action: function () {
+                    self.activeViewName(item.view);
+                }
+            };
+        }));
+    };
+
     ui.Switch = function (id, config) {
         this.id = id;
         this.e_id = id + '-enable';
@@ -114,19 +156,12 @@
     };
 
     ui.fillMenu = function (items) {
-        $('#menu').html(items.map(function (item) {
-            return '<a class="menu-item' +
-                (item.state === ui.currentState ? ' selected' : '') +
-                '" href="#">' + item.name + '</a>';
-        }).join('\n') + '&nbsp;');
-
-        $('#menu > a').each(function (i, element) {
-            var item = items[i];
-            if (item.state && !item.func) {
-                item.func = ui.stateSetter(item.state);
+        items.each(function (item) {
+            if (item.state && !item.action) {
+                item.action = ui.stateSetter(item.state);
             }
-            $(element).click(item.func);
         });
+        ui.view.navbar.menuItems(items);
     };
 
     ui.stateSetter = function (state) {
@@ -189,24 +224,4 @@
         }
     };
 
-    $(document).ready(function () {
-        ui.addState('loading', {divs: ['loading']});
-        ui.addState('main', {
-            divs: [],
-            onEnter: function () {
-                var user = registry.auth.user;
-                var role = user ? user.role : 'anonymous';
-                if (role === 'moderator') {
-                    ui.setState('mod-main');
-                } else if (user.role === 'counter') {
-                    ui.setState('cnt-main');
-                } else if (user.role === 'voter') {
-                    ui.setState('vot-main');
-                } else {
-                    ui.setState('auth-form');
-                }
-            }
-        });
-        ui.setState('loading');
-    });
 })(this.registry);

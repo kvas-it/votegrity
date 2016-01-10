@@ -19,175 +19,216 @@
     <script src="js/store.js"></script>
     <script src="js/crypto.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/keygen.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/moderator.js"></script>
     <script src="js/counter.js"></script>
     <script src="js/voter.js"></script>
-    <script src="js/keygen.js"></script>
     <script src="js/main.js"></script>
 
   </head>
   <body>
 
     <!-- navigation bar -->
-    <div id="navbar">
-      <div id="user" class="right">
-        <span id="user-info">Anonymous</span>
-        <button id="logout-button" class="hidden">log out</button>
+    <div data-bind="with: navbar" id="navbar">
+      <div class="right">
+        <span data-bind="text: userInfo"></span>
+        <button data-bind="visible: isLoggedIn, click: logOut">log out</button>
       </div>
-      <div id="menu">&nbsp;</div>
+      <div>
+        &nbsp;
+        <span data-bind="foreach: menuItems">
+          <a class="menu-item" href="#"
+            data-bind="text: name, click: action"></a>
+        </span>
+      </div>
     </div>
+
 
     <!-- error display area -->
     <div id="error">
-      <span id="error-message"></span>
-    </div>
-
-    <!-- loading placeholder -->
-    <div id="loading">
-      Loading...
+      <span data-bind="text: errorMessage"></span>
     </div>
 
 
-    <!-- auth form module -->
-    <div id="auth-form" class="hidden">
-      <form id="login-form" action="#">
-        Enter password to log in
-        <input type="password" name="password" id="password-input" />
-        <button id="login-button">submit</button>
+    <!-- login form -->
+    <div  data-bind="with: auth">
+     <div id="auth-form">
+      <form data-bind="submit: logIn">
+        <p data-bind="text: status" />
+        <p>
+          Enter password to log in
+          <input type="password"  data-bind="value: password" />
+          <button data-bind="click: logIn">submit</button>
+        </p>
       </form>
+     </div>
     </div>
 
 
-    <!-- main state for moderator -->
-    <div id="mod-main" class="hidden">
-      <p>
-      You're the moderator of this voting process.
-      Moderator is responsible for
-      entering moderator and counter public keys into the system,
-      entering all users into the system,
-      entering general information and list of options,
-      distributing the ballots,
-      collecting the ballots and passing them to the counter.
-      </p>
-    </div>
+    <!-- moderator interface -->
+    <div data-bind="with: moderator">
+     <div id="moderator-ui">
 
-
-    <!-- key management interface -->
-    <div id="mod-keys" class="hidden">
-      <h1>Key management</h1>
-
-      <p id="key-moderator">
-        Moderator public key <span id="key-moderator-status"></span>
-        <button id="key-moderator-save">save</button><br/>
-        <textarea id="key-moderator-content"></textarea>
-      </p>
-
-      <p id="key-counter">
-        Counter public key <span id="key-counter-status"></span>
-        <button id="key-counter-save">save</button><br/>
-        <textarea id="key-counter-content"></textarea>
-      </p>
-    </div>
-
-
-    <!-- moderator voter list editing interface -->
-    <div id="mod-voters" class="hidden">
-      <h1>Voter list</h1>
-
-      <div id="mod-voter-list"></div>
-
-      <p id="new-voters">
-        <button id="new-voters-save">add voters</button>
-        <span id="new-voters-status"></span>
-        <em>format of voter records is NAME:E-MAIL</em><br/>
-        <textarea id="new-voters-content"></textarea><br/>
-      </p>
-    </div>
-
-
-    <!-- voting details editing -->
-    <div id="mod-voting-info" class="hidden">
-      <h1>Voting configuration</h1>
-
-      <p id="voting-descr">
-        General information about the voting
-        <span id="voting-descr-status"></span>
-        <button id="voting-descr-save">save</button><br/>
-        <textarea id="voting-descr-content"></textarea>
-      </p>
-
-      <p id="voting-options">
-        List of voting options (one per line)
-        <span id="voting-options-status"></span>
-        <button id="voting-options-save">save</button><br/>
-        <textarea id="voting-options-content"></textarea>
-      </p>
-    </div>
-
-
-    <!-- ballot distribution and collection-->
-    <div id="mod-ballots" class="hidden">
-      <h1>Ballot management</h1>
-
-      <p id="ballot-issuance">Ballot issuance status: <em>loading...</em></p>
-    </div>
-
-
-    <!-- main state for counter -->
-    <div id="cnt-main" class="hidden">
-      You're the counter. The counter is responsible for issuing ballots,
-      decrypting ballots and calculating the results of the election.
-    </div>
-
-
-    <!-- ballot issuance -->
-    <div id="cnt-ballots" class="hidden">
-      <h1>Ballots issuance</h1>
-
-      <p>Ballots issuance status: <span data-bind="text: status" /></span></p>
-      <p>Voters registered: <span data-bind="text: votersCount"></span></p>
-      <p>Ballots issued: <span data-bind="text: ballotsCount"></span></p>
-
-      <button data-bind="visible: canIssue, click: unlock">issue ballots</button>
-
-      <div data-bind="visible: unlocked">
-        <p>Ballots to issue: <span data-bind="text: toIssue" /></p>
-        <button data-bind="click: issue">Confirm issuance</button>
+      <!-- main state for moderator -->
+      <div data-bind="with: main">
+        <p>
+        You're the moderator of this voting process.
+        Moderator is responsible for
+        entering moderator and counter public keys into the system,
+        entering all users into the system,
+        entering general information and list of options,
+        distributing the ballots,
+        collecting the ballots and passing them to the counter.
+        </p>
       </div>
+
+
+      <!-- key management interface -->
+      <div data-bind="with: keyManagement">
+        <h1>Key management</h1>
+
+        <p data-bind="with: moderatorKey">
+          Moderator public key
+          <span data-bind="text: status"></span>
+          <button data-bind="visible: editable, click: save">save</button><br/>
+          <textarea data-bind="enable: editable, value: key"></textarea>
+        </p>
+
+        <p data-bind="with: counterKey">
+          Counter public key
+          <span data-bind="text: status"></span>
+          <button data-bind="visible: editable, click: save">save</button><br/>
+          <textarea data-bind="enable: editable, value: key"></textarea>
+        </p>
+      </div>
+
+
+      <!-- moderator voter list editing interface -->
+      <div data-bind="with: voterManagement">
+        <h1>Voter list</h1>
+
+        <div id="mod-voter-list">
+          <div data-bind="foreach: voters">
+            <span data-bind="text: id() + '.'"></span>
+            <span data-bind="text: name"></span>
+            <span data-bind="text: '<' + email() + '>'"></span>
+          </div>
+        </div>
+
+        <p data-bind="with: voterAdder">
+          <button data-bind="visible: editable, click: save">add voters</button>
+          <span data-bind="text: status"></span>
+          <em>format of voter records is NAME:E-MAIL</em><br/>
+          <textarea data-bind="enable: editable, value: newVoters"></textarea>
+        </p>
+      </div>
+
+
+      <!-- voting details editing -->
+      <div data-bind="with: votingConfig">
+        <h1>Voting configuration</h1>
+
+        <p data-bind="with: generalInfo">
+          General information about the voting
+          <span data-bind="text: status"></span>
+          <button data-bind="visible: editable, click: save">save</button><br/>
+          <textarea data-bind="enable: editable, value: key"></textarea>
+        </p>
+
+        <p data-bind="with: votingOptions">
+          List of voting options (one per line)
+          <span data-bind="text: status"></span>
+          <button data-bind="visible: editable, click: save">save</button><br/>
+          <textarea data-bind="enable: editable, value: key"></textarea>
+        </p>
+      </div>
+
+
+      <!-- ballot distribution and collection-->
+      <div data-bind="with: ballotManagement">
+        <h1>Ballot management</h1>
+
+        <p data-bind="with: issuanceSwitch">
+          Ballot issuance status:
+          <span data-bind="text: status"></span>
+          <button data-bind="visible: enabled, click: disable">disable</button>
+          <button data-bind="visible: !enabled(), click: enable">enable</button>
+        </p>
+      </div>
+     </div>
     </div>
 
+    <!-- counter interface -->
+    <div data-bind="with: counter">
+     <div id="counter-ui">
 
-    <!-- counting -->
-    <div id="cnt-count" class="hidden">
-      <h1>Counting and publishing results</h1>
+      <!-- main state for counter -->
+      <div data-bind="with: main">
+        You're the counter. The counter is responsible for issuing ballots,
+        decrypting ballots and calculating the results of the election.
+      </div>
+
+
+      <!-- ballot issuance -->
+      <div data-bind="with: ballots">
+        <h1>Ballot issuance</h1>
+
+        <p>Ballot issuance status: <span data-bind="text: status" /></span></p>
+        <p>Voters registered: <span data-bind="text: votersCount"></span></p>
+        <p>Ballots issued: <span data-bind="text: ballotsCount"></span></p>
+
+        <button data-bind="visible: canIssue, click: unlock">issue ballots</button>
+
+        <div data-bind="visible: unlocked">
+          <p>Ballots to issue: <span data-bind="text: toIssue" /></p>
+          <button data-bind="click: issue">Confirm issuance</button>
+        </div>
+      </div>
+
+
+      <!-- counting -->
+      <div data-bind="with: counting">
+        <h1>Counting and publishing results</h1>
+      </div>
+     </div>
     </div>
 
-
-    <!-- main state for voter -->
-    <div id="vot-main" class="hidden">
-      You're a voter.
+    <div data-bind="with: voter">
+     <div id="voter-ui">
+      <!-- main state for voter -->
+      <div id="vot-main" class="hidden">
+        You're a voter.
+      </div>
+     </div>
     </div>
 
 
     <!-- keygen module -->
-    <div id="keygen" class="hidden">
+    <div data-bind="with: keygen">
+     <div id="keygen">
       <h1>Key generation interface</h1>
-      <button id="keygen-generate">Generate password and key</button>
+
+      <button data-bind="click: generate">Generate password and key</button>
+
       <p class="info">
         Save your password reliably (for example using a password manager
         like 1Password) and don't ever share it with anyone.
       </p>
+
       Password<br/>
-      <input type="text" class="big" readonly id="keygen-password" />
+      <input type="text" class="big" readonly data-bind="value: password" />
+
       <p class="info">
         Send the content of the textarea below to the moderator.
         It's not confidential but it's important that the public
         key in the system is this one as it will be used to
         verify your signatures and encrypt information sent to you.
       </p>
+
       Public information (for moderator)<br/>
-      <textarea readonly id="keygen-public-info"></textarea>
+      <textarea readonly data-bind="value: publicInfo"></textarea>
+     </div>
     </div>
 
   </body>

@@ -57,11 +57,7 @@ a.menu-item:hover {
     background: white;
 }
 
-#keygen,
-#mod-main, #mod-keys, #mod-voting-info, #mod-voters, #mod-ballots,
-#cnt-main, #cnt-ballots, #cnt-count,
-#vot-main
-{
+#keygen, #moderator-ui, #counter-ui, #voter-ui {
     margin-left: 40px;
     margin-top: 40px;
 }

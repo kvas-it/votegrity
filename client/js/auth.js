@@ -62,11 +62,11 @@
             password: ko.observable()
         };
 
-        self.submit = function () {
+        self.logIn = function () {
             auth.authenticate(self.password());
         };
 
-        self.status = ko.observable(function () {
+        self.status = ko.pureComputed(function () {
             var users = store.all().users;
             if (!users) {
                 return '';

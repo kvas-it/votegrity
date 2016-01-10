@@ -136,15 +136,29 @@
         return self;
     };
 
-    /* Loaded keys. */
+    /* Loaded keys as an observable array. */
     store.all = ko.observable({});
 
+    /* Add key to the loaded keys. */
     store.loadKey = function (key) {
         var all = store.all();
         if (!(key in all)) {
             all[key] = store.Key(key);
             store.all(all);
         }
+    };
+
+    /* Get key value.
+     *
+     * This will return synchronously, but if the key is not already loaded
+     * it will return ``undefined`` and initiate the loading.
+     *
+     * This method is intended for computed observables -- they will be updated
+     * when the value is loaded.
+     */
+    store.getKeyValue = function (key) {
+        store.loadKey(key);
+        return store.all()[key].value();
     };
 
     store.setAccessToken = function (token) {

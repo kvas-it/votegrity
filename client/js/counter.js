@@ -14,82 +14,77 @@
 
     cnt.BallotIssuance = function () {
 
-        this.issuanceEnabled = ko.observable(false);
-        this.votersCount = ko.observable(0);
-        this.ballotsCount = ko.observable(0);
-        this.unlocked = ko.observable(false);
+        var self = {
+            issuanceEnabled: ko.pureComputed(function () {
+                var acl = store.getKeyValue('ballots.acl');
+                if (acl) {
+                    return acl.indexOf('counter:write') !== -1;
+                } else {
+                    return false;
+                }
+            }),
+            votersCount: ko.pureComputed(function () {
+                var usersKey = store.all().users;
+                var usersList = usersKey ? usersKey.value() : undefined;
 
-        this.status = ko.computed(function () {
-            return this.issuanceEnabled() ? 'enabled' : 'disabled';
-        }, this);
+                if (usersList) {
+                    return utils.parseUserList(usersList).length;
+                } else {
+                    return 0;
+                }
+            }),
+            ballotsCount: ko.observable(0),
+            unlocked: ko.observable(false)
+        };
 
-        this.toIssue = ko.computed(function () {
-            return this.votersCount() - this.ballotsCount();
-        }, this);
-
-        this.canIssue = ko.computed(function () {
-            return this.issuanceEnabled() && (this.toIssue() > 0);
-        }, this);
-    };
-
-    cnt.BallotIssuance.loadVotersCount = function () {
-        return store.read('users', '').then(function (userList) {
-            var users = utils.parseUserList(userList);
-            return users.filter(function (u) {return u.role === 'voter';}).length;
+        self.status = ko.computed(function () {
+            return self.issuanceEnabled() ? 'enabled' : 'disabled';
         });
-    };
 
-    cnt.BallotIssuance.loadBallotsCount = function () {
-        return store.read('ballots', '').then(function (ballots) {
-            return 0 && ballots;
+        self.toIssue = ko.computed(function () {
+            return self.votersCount() - self.ballotsCount();
         });
-    };
 
-    cnt.BallotIssuance.loadIssuanceEnabled = function () {
-        return store.read('ballots.acl', '').then(function (acl) {
-            return acl.indexOf('counter:write') !== -1;
+        self.canIssue = ko.computed(function () {
+            return self.issuanceEnabled() && (self.toIssue() > 0);
         });
+
+        self.unlock = function () {
+            this.unlocked(true);
+        };
+
+        self.issue = function () {
+            window.alert('yo!');
+        };
+
+        return self;
     };
 
-    cnt.BallotIssuance.prototype.load = function () {
-        var self = this;
-        return utils.pAll([
-            self.loadVotersCount().then(self.votersCount),
-            self.loadBallotsCount().then(self.ballotsCount),
-            self.loadIssuanceEnabled().then(self.issuanceEnabled)
+    cnt.Counting = function () {
+
+        var self = {};
+
+        return self;
+    };
+
+    cnt.View = function () {
+
+        var self = {
+            activeViewName: ko.observable('main')
+        };
+
+        ui.setSubViews(self, {
+            main: function () {return {};},
+            ballots: cnt.BallotIssuance,
+            counting: cnt.Counting
+        });
+
+        self.menuItems = ui.makeMenu(self, [
+            {name: 'Ballots issuance', view: 'ballots'},
+            {name: 'Counting and publishing results', view: 'counting'}
         ]);
-    };
 
-    cnt.BallotIssuance.prototype.unlock = function () {
-        this.unlocked(true);
+        return self;
     };
-
-    cnt.BallotIssuance.prototype.issue = function () {
-        window.alert('yo!');
-    };
-
-    $(document).ready(function () {
-        var cntMenu = [
-            {name: 'Ballots issuance', state: 'cnt-ballots'},
-            {name: 'Counting and publishing results', state: 'cnt-count'}
-        ];
-        ui.addState('cnt-main', {
-            divs: ['cnt-main'],
-            menu: cntMenu
-        });
-        ui.addState('cnt-ballots', {
-            divs: ['cnt-ballots'],
-            menu: cntMenu,
-            onEnter: function (scope) {
-                scope.bi = new cnt.BallotIssuance();
-                ko.applyBindings(scope.bi);
-                scope.bi.load();
-            }
-        });
-        ui.addState('cnt-count', {
-            divs: ['cnt-count'],
-            menu: cntMenu
-        });
-    });
 
 })(this.registry);
