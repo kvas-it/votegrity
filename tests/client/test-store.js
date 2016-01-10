@@ -13,6 +13,10 @@ describe('Store client', function () {
         store.setAccessToken('dummy');
     });
 
+    afterEach(function () {
+        store.setAccessToken(undefined);
+    });
+
     it('should write and read', function () {
         return store.write('a1', '123')
             .then(function () {
@@ -179,5 +183,53 @@ describe('Store key model', function () {
             .then(function () {
                 key.status().should.be.eql('missing');
             });
+    });
+});
+
+describe('Store key map', function () {
+
+    var mocking = window.registry.mocking;
+    var store = window.registry.store;
+
+    afterEach(mocking.unmockAll);
+
+    beforeEach(function () {
+        mocking.mock('store.Key', function (key) {
+            return {key: key};
+        });
+        store.setAccessToken(undefined); // Reset the key map.
+    });
+
+    it('should track the keys', function () {
+        store.all().should.be.eql({});
+        store.loadKey('a');
+        store.all().should.be.eql({a: {key: 'a'}});
+        store.loadKey('b');
+        store.all().should.be.eql({a: {key: 'a'}, b: {key: 'b'}});
+    });
+
+    it('should not recreate the keys', function () {
+        var counter = 0;
+        var tracker = ko.computed(function () {
+            store.all();
+            counter++;
+        });
+        tracker();
+        var before = counter;
+
+        store.loadKey('a');
+        var a1 = store.all().a;
+        store.loadKey('a');
+        var a2 = store.all().a;
+
+        (a1 === a2).should.be.ok;
+        // store.all should only be updated once.
+        counter.should.be.eql(before + 1);
+    });
+
+    it('should reset key map when access token changes', function () {
+        store.loadKey('a');
+        store.setAccessToken(undefined);
+        store.all().should.be.eql({});
     });
 });

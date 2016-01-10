@@ -22,6 +22,7 @@
         "$": true,
         "console": true,
         "ayepromise": true,
-        "cryptico": true
+        "cryptico": true,
+        "ko": true
     }
 }

@@ -8,16 +8,8 @@
 
     var store = registry.store = {};
 
-    store.accessToken = '';
+    store.accessToken = undefined;
     store.baseUrl = '';
-
-    store.setAccessToken = function (token) {
-        store.accessToken = token;
-    };
-
-    store.setBaseUrl = function (url) {
-        store.baseUrl = url;
-    };
 
     function apiCall(params) {
 
@@ -41,6 +33,11 @@
                 error = 'Request failed';
             }
             deferred.reject(Error(error));
+        }
+
+        if (!store.accessToken) {
+            // No need to go to server, it will fail.
+            deferred.reject(Error('Access denied'));
         }
 
         $.ajax({
@@ -137,6 +134,27 @@
 
         self.load();
         return self;
+    };
+
+    /* Loaded keys. */
+    store.all = ko.observable({});
+
+    store.loadKey = function (key) {
+        var all = store.all();
+        if (!(key in all)) {
+            all[key] = store.Key(key);
+            store.all(all);
+        }
+    };
+
+    store.setAccessToken = function (token) {
+        store.accessToken = token;
+        store.all({});
+    };
+
+    store.setBaseUrl = function (url) {
+        store.baseUrl = url;
+        store.all({});
     };
 
 })(this.registry);
