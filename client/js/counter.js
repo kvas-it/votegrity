@@ -6,8 +6,7 @@
 
     'use strict';
 
-    var utils = registry.utils;
-    var store = registry.store;
+    // var store = registry.store;
     var ui = registry.ui;
 
     var cnt = registry.cnt = {};
@@ -15,23 +14,9 @@
     cnt.BallotIssuance = function () {
 
         var self = {
-            issuanceEnabled: ko.pureComputed(function () {
-                var acl = store.getKeyValue('ballots.acl');
-                if (acl) {
-                    return acl.indexOf('counter:write') !== -1;
-                } else {
-                    return false;
-                }
-            }),
+            issuanceEnabled: registry.mod.ballotIssuanceEnabled,
             votersCount: ko.pureComputed(function () {
-                var usersKey = store.all().users;
-                var usersList = usersKey ? usersKey.value() : undefined;
-
-                if (usersList) {
-                    return utils.parseUserList(usersList).length;
-                } else {
-                    return 0;
-                }
+                return registry.mod.voterList().length;
             }),
             ballotsCount: ko.observable(0),
             unlocked: ko.observable(false)

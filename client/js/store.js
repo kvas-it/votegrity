@@ -148,6 +148,12 @@
         }
     };
 
+    /* Get KO model for particular key using the cache above. */
+    store.getKeyModel = function (key) {
+        store.loadKey(key);
+        return store.all()[key];
+    };
+
     /* Get key value.
      *
      * This will return synchronously, but if the key is not already loaded
@@ -156,9 +162,13 @@
      * This method is intended for computed observables -- they will be updated
      * when the value is loaded.
      */
-    store.getKeyValue = function (key) {
-        store.loadKey(key);
-        return store.all()[key].value();
+    store.getKeyValue = function (key, defaultValue) {
+        var value = store.getKeyModel(key).value();
+        if (value === undefined) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     };
 
     store.setAccessToken = function (token) {

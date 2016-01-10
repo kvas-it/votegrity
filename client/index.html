@@ -85,69 +85,76 @@
 
 
       <!-- key management interface -->
-      <div data-bind="with: keyManagement">
+      <div data-bind="with: keys">
         <h1>Key management</h1>
 
         <p data-bind="with: moderatorKey">
           Moderator public key
-          <span data-bind="text: status"></span>
-          <button data-bind="visible: editable, click: save">save</button><br/>
-          <textarea data-bind="enable: editable, value: key"></textarea>
+          <button data-bind="visible: editable, click: save">save</button>
+          <span class="status" data-bind="text: status"></span><br/>
+          <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
 
         <p data-bind="with: counterKey">
           Counter public key
-          <span data-bind="text: status"></span>
-          <button data-bind="visible: editable, click: save">save</button><br/>
-          <textarea data-bind="enable: editable, value: key"></textarea>
+          <button data-bind="visible: editable, click: save">save</button>
+          <span class="status" data-bind="text: status"></span><br/>
+          <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
       </div>
 
 
       <!-- moderator voter list editing interface -->
-      <div data-bind="with: voterManagement">
+      <div data-bind="with: voters">
         <h1>Voter list</h1>
 
         <div id="mod-voter-list">
+          <em data-bind="visible: voters().length === 0">no voters</em>
           <div data-bind="foreach: voters">
-            <span data-bind="text: id() + '.'"></span>
+            <span data-bind="text: id + '.'"></span>
             <span data-bind="text: name"></span>
-            <span data-bind="text: '<' + email() + '>'"></span>
+            <span data-bind="text: '<' + email + '>'"></span><br/>
           </div>
         </div>
 
+        <p class="info">Note: format of voter records is NAME:E-MAIL.</p>
+
         <p data-bind="with: voterAdder">
           <button data-bind="visible: editable, click: save">add voters</button>
-          <span data-bind="text: status"></span>
-          <em>format of voter records is NAME:E-MAIL</em><br/>
+          <span class="status" data-bind="text: status"></span></br>
           <textarea data-bind="enable: editable, value: newVoters"></textarea>
         </p>
       </div>
 
 
       <!-- voting details editing -->
-      <div data-bind="with: votingConfig">
+      <div data-bind="with: info">
         <h1>Voting configuration</h1>
 
         <p data-bind="with: generalInfo">
           General information about the voting
-          <span data-bind="text: status"></span>
-          <button data-bind="visible: editable, click: save">save</button><br/>
-          <textarea data-bind="enable: editable, value: key"></textarea>
+          <button data-bind="visible: editable, click: save">save</button>
+          <span class="status" data-bind="text: status"></span><br/>
+          <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
 
         <p data-bind="with: votingOptions">
           List of voting options (one per line)
-          <span data-bind="text: status"></span>
-          <button data-bind="visible: editable, click: save">save</button><br/>
-          <textarea data-bind="enable: editable, value: key"></textarea>
+          <button data-bind="visible: editable, click: save">save</button>
+          <span class="status" data-bind="text: status"></span><br/>
+          <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
       </div>
 
 
       <!-- ballot distribution and collection-->
-      <div data-bind="with: ballotManagement">
+      <div data-bind="with: ballots">
         <h1>Ballot management</h1>
+
+        <p class="info">
+          Note: Enabling ballot issuance disables voting list and voting
+          configuration.
+        </p>
 
         <p data-bind="with: issuanceSwitch">
           Ballot issuance status:

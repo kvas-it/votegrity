@@ -13,41 +13,60 @@
 
     var mod = registry.mod = {};
 
-    /* Load voter list (return promise). */
-    function getVoterList() {
-        return store.read('users')
-            .then(function (data) {
-                var userList = utils.parseUserList(data);
-                return userList
-                    .filter(function (u) {return u.role === 'voter';})
-                    .sort(function (a, b) {return Number(a.id) - Number(b.id);});
-            });
-    }
+    /* Commonly used observables. */
 
-    /* Load voter list. */
-    mod.loadVoterList = function () {
-        var list = $('#mod-voter-list');
-        return getVoterList()
-            .then(function (voterList) {
-                if (voterList.length === 0) {
-                    list.html('<em>no voters</em>');
-                } else {
-                    list.html(voterList.map(function (v) {
-                        return v.id + '. ' + v.name + ' &lt;' + v.email + '&gt;';
-                    }).join('<br/>\n'));
-                }
-            });
+    mod.userList = ko.pureComputed(function () {
+        return utils.parseUserList(store.getKeyValue('users', ''));
+    });
+
+    mod.ballotIssuanceEnabled = ko.pureComputed(function () {
+        var acl = store.getKeyValue('ballots.acl', '');
+        return acl.indexOf('counter:write') !== -1;
+    });
+
+    mod.voterList = ko.pureComputed(function () {
+        return mod.userList()
+            .filter(function (u) {return u.role === 'voter';})
+            .sort(function (a, b) {return Number(a.id) - Number(b.id);});
+    });
+
+    /* Views. */
+
+    mod.PublicKeyEditor = function (key) {
+        return ko.computed(function () {
+            var keyModel = store.getKeyModel(key);
+            var aclModel = store.getKeyModel(key + '.acl');
+            return {
+                value: keyModel.value,
+                status: keyModel.status,
+                save: function () {
+                    aclModel.value('*:read');
+                    return utils.pAll([keyModel.save(), aclModel.save()]);
+                },
+                editable: ko.pureComputed(function () {
+                    var lv = keyModel.loadedValue() || '';
+                    return lv.length < 100;
+                })
+            };
+        });
+    };
+
+    mod.KeyManagement = function () {
+        return {
+            moderatorKey: mod.PublicKeyEditor('key-moderator'),
+            counterKey: mod.PublicKeyEditor('key-counter'),
+        };
     };
 
     /* Create voters and return their user records and passwords. */
-    function createVoters(votersData, usersData) {
+    function createVoters(votersData) {
 
         var votersList = utils.parseData(votersData, ['name', 'email']);
         if (votersList.length === 0) {
             throw Error('No voter information supplied');
         }
 
-        var userList = utils.parseUserList(usersData);
+        var userList = mod.userList();
         var maxId = Math.max.apply(null, userList.map(function (u) {
             return Number(u.id);
         }));
@@ -87,136 +106,145 @@
             });
     }
 
-    /* Add voters to the voters list (create accounts). */
-    mod.addVoters = function (votersData) {
-        return utils.pJoin(
-            store.read('users'),
-            store.read('init-passwords')
-                .fail(function () {return '';}),
-            utils.pDelay(0),
-            function (usersData, initPWData) {
-                var created = createVoters(votersData, usersData);
+    mod.VoterAdder = function () {
+
+        var usersModel = store.getKeyModel('users');
+        var initPasswordsModel = store.getKeyModel('init-passwords');
+
+        var self = {
+            newVoters: ko.observable(''),
+            error: ko.observable(''),
+        };
+
+        self.editable = ko.pureComputed(function () {
+            return !mod.ballotIssuanceEnabled();
+        });
+
+        self.status = ko.pureComputed(function () {
+            if (self.error()) {
+                return self.error();
+            } else {
+                return usersModel.status();
+            }
+        });
+
+        self.save = function () {
+            self.error('');
+            try {
+                var usersData = usersModel.value() || '';
+                var initPWData = initPasswordsModel.value() || '';
+                var created = createVoters(self.newVoters());
                 var records = created.map(function (v) {return v.userRec;});
                 var pws = created.map(function (v) {return v.pwRec;});
+
+                usersModel.value(usersData + '\n' + records.join('\n'));
+                initPasswordsModel.value(initPWData + '\n' + pws.join('\n'));
+
                 return utils.pAll([
-                    store.write('users', usersData + '\n' + records.join('\n')),
-                    store.write('init-passwords', initPWData + '\n' + pws.join('\n'))
-                ]);
-            });
-    };
-
-    /* Make permission switch that enables counter to edit a file. */
-    function makeACLSwitch(id, key) {
-        return new ui.Switch(id, {
-            load: function () {
-                return store.read(key, '')
-                    .then(function (acl) {
-                        return acl.indexOf('counter:write') !== -1;
-                    });
-            },
-            enable: function () {
-                return store.write(key, '*:read\ncounter:write');
-            },
-            disable: function () {
-                return store.write(key, '*:read');
-            }
-        });
-    }
-
-    /* Make a textbox that is connected to a storage key. */
-    function makeStorageConnectedTextBox(keyId, isDisabled) {
-        return new ui.TextBox(keyId, {
-            load: function () {
-                return store.read(keyId, '');
-            },
-            save: function (content) {
-                return utils.pAll([
-                    store.write(keyId, content),
-                    store.write(keyId + '.acl', '*:read')
-                ]);
-            },
-            isDisabled: isDisabled
-        });
-    }
-
-    /* Make a textbox for editing voting info. */
-    function makeVotingInfoBox(keyId) {
-        return makeStorageConnectedTextBox(keyId, function () {
-            /* When counter can issue ballots, voting info can't be edited. */
-            return store.read('ballots.acl', '')
-                .then(function (acl) {
-                    return acl.indexOf('counter:write') !== -1;
-                });
-        });
-    }
-
-    /* Make a textbox for editing a public key. */
-    function makeKeyBox(keyId) {
-        return makeStorageConnectedTextBox(keyId, function (content) {
-            /* Once the key is entered we don't want to change it. */
-            return content.length > 100;
-        });
-    }
-
-    $(document).ready(function () {
-        var modMenu = [
-            {name: 'Key management', state: 'mod-keys'},
-            {name: 'Voter list', state: 'mod-voters'},
-            {name: 'Voting configuration', state: 'mod-voting-info'},
-            {name: 'Ballot management', state: 'mod-ballots'}
-        ];
-        ui.addState('mod-main', {
-            divs: ['mod-main'], menu: modMenu
-        });
-        ui.addState('mod-keys', {
-            divs: ['mod-keys'],
-            menu: modMenu,
-            onEnter: function (scope) {
-                scope.modKey = makeKeyBox('key-moderator');
-                scope.cntKey = makeKeyBox('key-counter');
-                return utils.pAll([
-                    scope.modKey.load(),
-                    scope.cntKey.load()
-                ]);
-            }
-        });
-        ui.addState('mod-voting-info', {
-            divs: ['mod-voting-info'],
-            menu: modMenu,
-            onEnter: function (scope) {
-                scope.votingDescr = makeVotingInfoBox('voting-descr');
-                scope.votingOptions = makeVotingInfoBox('voting-options');
-                return utils.pAll([
-                    scope.votingDescr.load(),
-                    scope.votingOptions.load()
-                ]);
-            }
-        });
-        ui.addState('mod-voters', {
-            divs: ['mod-voters'],
-            menu: modMenu,
-            onEnter: function (scope) {
-                scope.newVoters = new ui.TextBox('new-voters', {
-                    load: function () {
-                        return mod.loadVoterList()
-                            .then(function () {return '';});
-                    },
-                    save: mod.addVoters,
-                    isDisabled: function () {
-                        return false;
+                    usersModel.save(),
+                    initPasswordsModel.save()
+                ])
+                .then(function () {
+                    if (!usersModel.error()) {
+                        self.newVoters('');
                     }
                 });
-                return scope.newVoters.load();
+            } catch (err) {
+                console.log(err);
+                self.error(err.message);
             }
+        };
+
+        return self;
+    };
+
+    mod.Voters = function () {
+        return {
+            voters: mod.voterList,
+            voterAdder: mod.VoterAdder()
+        };
+    };
+
+    mod.VotingInfoEditor = function (key) {
+        return ko.computed(function () {
+            var keyModel = store.getKeyModel(key);
+            var aclModel = store.getKeyModel(key + '.acl');
+            return {
+                value: keyModel.value,
+                status: keyModel.status,
+                save: function () {
+                    aclModel.value('*:read');
+                    return utils.pAll([keyModel.save(), aclModel.save()]);
+                },
+                editable: ko.pureComputed(function () {
+                    return !mod.ballotIssuanceEnabled();
+                })
+            };
         });
-        ui.addState('mod-ballots', {
-            divs: ['mod-ballots'],
-            menu: modMenu,
-            onEnter: function (scope) {
-                scope.biSwitch = makeACLSwitch('ballot-issuance', 'ballots.acl');
-                return scope.biSwitch.load();
-            }
+    };
+
+    mod.VotingInfo = function () {
+        return {
+            generalInfo: mod.VotingInfoEditor('voting-descr'),
+            votingOptions: mod.VotingInfoEditor('voting-options')
+        };
+    };
+
+    mod.IssuanceSwitch = function () {
+
+        var ballotsACLModel = store.getKeyModel('ballots.acl');
+
+        var self = {
+            enabled: mod.ballotIssuanceEnabled,
+            disabled: ko.pureComputed(function () {
+                return !mod.ballotIssuanceEnabled();
+            }),
+            status: ko.pureComputed(function () {
+                return mod.ballotIssuanceEnabled() ? 'enabled' : 'disabled';
+            })
+        };
+
+        self.enable = function () {
+            ballotsACLModel.value('*:read\ncounter:write');
+            return ballotsACLModel.save();
+        };
+
+        self.disable = function () {
+            ballotsACLModel.value('*:read');
+            return ballotsACLModel.save();
+        };
+
+        return self;
+    };
+
+    mod.Ballots = function () {
+        return {
+            issuanceSwitch: mod.IssuanceSwitch()
+        };
+    };
+
+    mod.View = function () {
+
+        var self = {
+            activeViewName: ko.observable('main')
+        };
+
+        ui.setSubViews(self, {
+            main: function () {return {};},
+            keys: mod.KeyManagement,
+            voters: mod.Voters,
+            info: mod.VotingInfo,
+            ballots: mod.Ballots
         });
-    });
+
+        self.menuItems = ui.makeMenu(self, [
+            {name: 'Key management', view: 'keys'},
+            {name: 'Voter list', view: 'voters'},
+            {name: 'Voting configuration', view: 'info'},
+            {name: 'Ballot management', view: 'ballots'}
+        ]);
+
+        return self;
+    };
 
 })(this.registry);
