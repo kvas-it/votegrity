@@ -8,7 +8,6 @@
 
     var crypto = registry.crypto;
     var store = registry.store;
-    var ui = registry.ui;
     var utils = registry.utils;
 
     var auth = registry.auth = {};
@@ -21,85 +20,72 @@
         store.setAccessToken(auth.token);
     };
 
-    /* Try to authenticate with current access token. */
-    auth.authenticate = function () {
-        return store.read('users')
-            .then(function success(usersData) {
-                var users = utils.parseUserList(usersData);
-                auth.user = users.filter(function (u) {
-                    return u.htoken === auth.htoken;
-                })[0];
-                auth.displayUser();
-                if (!auth.user) {
-                    throw Error('Unknown user');
-                }
-            });
+    /* Log out. */
+    auth.logOut = function () {
+        auth.password = undefined;
+        auth.token = undefined;
+        auth.htoken = undefined;
+        store.setAccessToken(undefined);
     };
 
-    /* Set password, try to authenticate.
-     * Go to UI on success or to login form on error. */
-    auth.uiAuthenticate = function (password) {
-
+    /* Authenticate with password. */
+    auth.authenticate = function (password) {
         auth.setPassword(password);
-
-        return auth.authenticate().then(
-            function success() {
-                ui.hideError();
-                ui.setState('main');
-            },
-            function error(err) {
-                ui.reportError(err);
-                ui.setState('auth-form');
-            });
+        store.loadKey('users');
+        return store.all().users._promise;
     };
 
-    /* Show current user in the UI. */
-    auth.displayUser = function () {
-        if (auth.user) {
-            $('#logout-button').show();
-            $('#user-info').html(
-                    'Logged in as ' + auth.user.name +
-                    ' (' + auth.user.role + ')');
-        } else {
-            $('#logout-button').hide();
-            $('#user-info').html('Anonymous');
+    /* Compute current logged in user. */
+    auth.user = ko.pureComputed(function () {
+        var usersKey = store.all().users;
+        var usersList = usersKey ? usersKey.value() : undefined;
+
+        if (usersList) {
+            var users = utils.parseUserList(usersList);
+            return users.filter(function (u) {
+                return u.htoken === auth.htoken;
+            })[0];
         }
-    };
+    });
 
-    /* Handle login form submit. */
-    auth.loginSubmit = function () {
-        return auth.uiAuthenticate($('#password-input').val());
-    };
-
-    /* Log out current user. */
-    auth.logoutSubmit = function () {
-        auth.password = auth.token = auth.htoken = auth.user = undefined;
-        store.setAccessToken('');
-        auth.displayUser();
-        ui.setState('auth-form');
-    };
-
-    /* Authenticate with the password from URL or display login form. */
+    /* Authenticate with the password from URL. */
     auth.init = function () {
         var token = utils.extractPasswordFromUrl();
         if (token !== undefined) {
-            return auth.uiAuthenticate(token);
-        } else {
-            ui.setState('auth-form');
+            return auth.authenticate(token);
         }
     };
 
-    $(document).ready(function () {
-        ui.addState('auth-form', {
-            onEnter: function () {
-                $('#password-input').val('');
-            },
-            divs: ['auth-form']
+    auth.View = function () {
+
+        var self = {
+            password: ko.observable()
+        };
+
+        self.submit = function () {
+            auth.authenticate(self.password());
+        };
+
+        self.status = ko.observable(function () {
+            var users = store.all().users;
+            if (!users) {
+                return '';
+            }
+            switch (users.status()) {
+                case 'loading...':
+                    return 'authenticating...';
+                case 'missing':
+                    return 'authentication not set up';
+                case 'no access':
+                    return 'authentication failed';
+                case 'disconnected':
+                    return 'disconnected';
+                default:
+                    return '';
+            }
         });
-        $('#login-form').submit(function (ev) {
-            auth.loginSubmit();
-            ev.preventDefault();
-        });
-        $('#logout-button').click(auth.logoutSubmit);
-    });
+
+        return self;
+    };
+
 })(this.registry);
