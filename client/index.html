@@ -163,6 +163,15 @@
           <button data-bind="visible: enabled, click: disable">disable</button>
           <button data-bind="visible: !enabled(), click: enable">enable</button>
         </p>
+
+        <p>
+          Voters registered:
+          <span data-bind="text: votersCount">0</span>
+        </p>
+        <p>
+          Ballots issued:
+          <span data-bind="text: ballotsCount">0</span>
+        </p>
       </div>
      </div>
     </div>

@@ -83,9 +83,7 @@
 
         var self = {
             issuanceEnabled: registry.mod.ballotIssuanceEnabled,
-            votersCount: ko.pureComputed(function () {
-                return registry.mod.voterList().length;
-            }),
+            votersCount: registry.mod.votersCount,
             ballotsError: ko.pureComputed(function () {
                 return cnt.ballotsText() === 'CHECK FAILED';
             }),

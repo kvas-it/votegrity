@@ -29,6 +29,9 @@
             .filter(function (u) {return u.role === 'voter';})
             .sort(function (a, b) {return Number(a.id) - Number(b.id);});
     });
+    mod.votersCount = ko.pureComputed(function () {
+        return mod.voterList().length;
+    });
 
     mod.moderatorPubKey = store.getKeyObservable('key-moderator', '');
     mod.counterPubKey = store.getKeyObservable('key-counter', '');
@@ -225,7 +228,9 @@
 
     mod.Ballots = function () {
         return {
-            issuanceSwitch: mod.IssuanceSwitch()
+            issuanceSwitch: mod.IssuanceSwitch(),
+            votersCount: mod.votersCount,
+            ballotsCount: registry.cnt.ballotsCount
         };
     };
 
