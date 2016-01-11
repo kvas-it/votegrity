@@ -121,7 +121,7 @@
         };
 
         self.editable = ko.pureComputed(function () {
-            return !mod.ballotIssuanceEnabled();
+            return true;
         });
 
         self.status = ko.pureComputed(function () {
@@ -186,7 +186,8 @@
                     return utils.pAll([keyModel.save(), aclModel.save()]);
                 },
                 editable: ko.pureComputed(function () {
-                    return !mod.ballotIssuanceEnabled();
+                    return !mod.ballotIssuanceEnabled() &&
+                           registry.cnt.ballotsCount() === 0;
                 })
             };
         });

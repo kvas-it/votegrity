@@ -58,12 +58,13 @@
         return tokens;
     };
 
+    /* Issue ballots (from scratch or add to already issued). */
     cnt.issueBallots = function (count) {
-        var ballotsModel = store.getKeyModel('ballots');
 
         auth.initKeys();
 
         var tokens = cnt.ballotTokens().concat(cnt.makeTokens(count));
+        var ballotsModel = store.getKeyModel('ballots');
 
         return utils.pJoin(
             store.getKeyValueP('voting-descr', ''),
@@ -79,6 +80,7 @@
             });
     };
 
+    /* Ballot issuance view. */
     cnt.BallotIssuance = function () {
 
         var self = {
@@ -124,6 +126,7 @@
         return self;
     };
 
+    /* Counting view. */
     cnt.Counting = function () {
 
         var self = {};

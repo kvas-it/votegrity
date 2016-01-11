@@ -75,10 +75,12 @@
         };
 
         self.status = ko.pureComputed(function () {
+
             var users = store.all().users;
-            if (!users) {
-                return '';
-            }
+
+            if (!users) {return '';}
+            if (!auth.password) {return '';}
+
             switch (users.status()) {
                 case 'loading...':
                     return 'authenticating...';
