@@ -33,22 +33,20 @@
     /* Views. */
 
     mod.PublicKeyEditor = function (key) {
-        return ko.computed(function () {
-            var keyModel = store.getKeyModel(key);
-            var aclModel = store.getKeyModel(key + '.acl');
-            return {
-                value: keyModel.value,
-                status: keyModel.status,
-                save: function () {
-                    aclModel.value('*:read');
-                    return utils.pAll([keyModel.save(), aclModel.save()]);
-                },
-                editable: ko.pureComputed(function () {
-                    var lv = keyModel.loadedValue() || '';
-                    return lv.length < 100;
-                })
-            };
-        });
+        var keyModel = store.getKeyModel(key);
+        var aclModel = store.getKeyModel(key + '.acl');
+        return {
+            value: keyModel.value,
+            status: keyModel.status,
+            save: function () {
+                aclModel.value('*:read');
+                return utils.pAll([keyModel.save(), aclModel.save()]);
+            },
+            editable: ko.pureComputed(function () {
+                var lv = keyModel.loadedValue() || '';
+                return lv.length < 100;
+            })
+        };
     };
 
     mod.KeyManagement = function () {
@@ -152,6 +150,7 @@
             } catch (err) {
                 console.log(err);
                 self.error(err.message);
+                return utils.pResolve();
             }
         };
 

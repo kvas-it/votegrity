@@ -6,6 +6,9 @@
 
     'use strict';
 
+    var utils = registry.utils;
+    var store = registry.store;
+
     var mocking = registry.mocking = {};
 
     mocking.originals = {};
@@ -57,4 +60,48 @@
             mocking.unmock(path);
         }
     };
+
+    /* Mock key-value store client with a simple implementation
+     * on top of a map. */
+    mocking.mockStore = function (storeData) {
+
+        storeData = storeData || {};
+
+        mocking.mock('store.read', function (key) {
+            if (key in storeData) {
+                return utils.pResolve(storeData[key]);
+            } else {
+                return utils.pReject(Error('Missing key: ' + key));
+            }
+        });
+
+        mocking.mock('store.write', function (key, data) {
+            storeData[key] = data;
+            return utils.pResolve(true);
+        });
+
+        /* Update one key and return a promise to update of observable. */
+        function set(key, value) {
+            storeData[key] = value;
+            return store.getKeyModel(key).load();
+        }
+
+        /* Update many keys and return a promise. */
+        function setMany(config) {
+            var loadPs = [];
+            for (var key in config) {
+                loadPs.push(set(key, config[key]));
+            }
+            return utils.pAll(loadPs);
+        }
+
+        store.setAccessToken('dummy'); // Reset store cache.
+
+        return {
+            set: set,
+            setMany: setMany,
+            get: function (key) {return storeData[key];}
+        };
+    };
+
 })(this.registry);
