@@ -6,10 +6,11 @@
 
     'use strict';
 
-    var ui = registry.ui;
+    var vot = registry.vot = {};
 
-    $(document).ready(function () {
-        ui.addState('vot-main', {divs: ['vot-main']});
-    });
+    vot.View = function () {
+        var self = {};
+        return self;
+    };
 
 })(this.registry);
