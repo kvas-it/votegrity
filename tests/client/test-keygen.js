@@ -17,6 +17,7 @@ describe('Keygen', function () {
         'vH6VAH7RdZVwhnVyp4ijBpD1rM8PH8ZPwL3s5c6ecPiMP+Keg4V0W3ub1Ej\n' +
         'mbGcxsN8/FmZNMkl6k434W+pKYtEpd5bM7rme2GQ2lPc3qYGEKzTojZZAc6\n' +
         'rvqIOp8pPISCbsD2Uxka4dFgWNFEdx7FtSRojAU0Mww+D2CV7Vpgs=';
+    var view;
 
     before(function () {
         mocking.mock('crypto.genToken', function () {
@@ -29,13 +30,14 @@ describe('Keygen', function () {
                 'mbGcxsN8/FmZNMkl6k434W+pKYtEpd5bM7rme2GQ2lPc3qYGEKzTojZZAc6' +
                 'rvqIOp8pPISCbsD2Uxka4dFgWNFEdx7FtSRojAU0Mww+D2CV7Vpgs=';
         });
+        view = keygen.View();
     });
+
     after(mocking.unmockAll);
 
     it('should generate password and key', function () {
-        keygen.uiGenerate();
-        $('#keygen-password').val().should.be.eql(password);
-        $('#keygen-public-info').val().should.be.eql(publcInfo);
+        view.generate();
+        view.password().should.be.eql(password);
+        view.publicInfo().should.be.eql(publcInfo);
     });
 });
-

@@ -32,7 +32,7 @@
     <!-- navigation bar -->
     <div data-bind="with: navbar" id="navbar">
       <div class="right">
-        <span data-bind="text: userInfo"></span>
+        <span data-bind="text: userInfo">Anonymous</span>
         <button data-bind="visible: isLoggedIn, click: logOut">log out</button>
       </div>
       <div>
@@ -47,14 +47,14 @@
 
     <!-- error display area -->
     <div id="error">
-      <span data-bind="text: errorMessage"></span>
+      <span data-bind="text: errorMessage">&nbsp;</span>
     </div>
 
 
     <!-- login form -->
     <div  data-bind="with: auth">
      <div id="auth-form">
-      <form data-bind="submit: logIn">
+      <form data-bind="submit: logIn" action="#">
         <p data-bind="text: status" />
         <p>
           Enter password to log in
@@ -91,14 +91,16 @@
         <p data-bind="with: moderatorKey">
           Moderator public key
           <button data-bind="visible: editable, click: save">save</button>
-          <span class="status" data-bind="text: status"></span><br/>
+          <span class="status" data-bind="text: status">loading...</span>
+          <br/>
           <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
 
         <p data-bind="with: counterKey">
           Counter public key
           <button data-bind="visible: editable, click: save">save</button>
-          <span class="status" data-bind="text: status"></span><br/>
+          <span class="status" data-bind="text: status">loading...</span>
+          <br/>
           <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
       </div>
@@ -117,7 +119,8 @@
 
         <p data-bind="with: voterAdder">
           <button data-bind="visible: editable, click: save">add voters</button>
-          <span class="status" data-bind="text: status"></span></br>
+          <span class="status" data-bind="text: status">loading...</span>
+          </br>
           <textarea data-bind="enable: editable, value: newVoters"></textarea>
         </p>
       </div>
@@ -130,14 +133,16 @@
         <p data-bind="with: generalInfo">
           General information about the voting
           <button data-bind="visible: editable, click: save">save</button>
-          <span class="status" data-bind="text: status"></span><br/>
+          <span class="status" data-bind="text: status">loading...</span>
+          <br/>
           <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
 
         <p data-bind="with: votingOptions">
           List of voting options (one per line)
           <button data-bind="visible: editable, click: save">save</button>
-          <span class="status" data-bind="text: status"></span><br/>
+          <span class="status" data-bind="text: status">loading...</span>
+          <br/>
           <textarea data-bind="enable: editable, value: value"></textarea>
         </p>
       </div>
@@ -154,7 +159,7 @@
 
         <p data-bind="with: issuanceSwitch">
           Ballot issuance status:
-          <span data-bind="text: status"></span>
+          <span data-bind="text: status">disabled</span>
           <button data-bind="visible: enabled, click: disable">disable</button>
           <button data-bind="visible: !enabled(), click: enable">enable</button>
         </p>
@@ -177,14 +182,26 @@
       <div data-bind="with: ballots">
         <h1>Ballot issuance</h1>
 
-        <p>Ballot issuance status: <span data-bind="text: status" /></span></p>
-        <p>Voters registered: <span data-bind="text: votersCount"></span></p>
-        <p>Ballots issued: <span data-bind="text: ballotsCount"></span></p>
+        <p>
+          Ballot issuance status:
+          <span data-bind="text: status">disabled</span>
+        </p>
+        <p>
+          Voters registered:
+          <span data-bind="text: votersCount">0</span>
+        </p>
+        <p>
+          Ballots issued:
+          <span data-bind="text: ballotsCount">0</span>
+        </p>
 
         <button data-bind="visible: canIssue, click: unlock">issue ballots</button>
 
         <div data-bind="visible: unlocked">
-          <p>Ballots to issue: <span data-bind="text: toIssue" /></p>
+          <p>
+            Ballots to issue:
+            <span data-bind="text: toIssue">0</span>
+          </p>
           <button data-bind="click: issue">Confirm issuance</button>
         </div>
       </div>
