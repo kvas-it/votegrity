@@ -30,6 +30,9 @@
             .sort(function (a, b) {return Number(a.id) - Number(b.id);});
     });
 
+    mod.moderatorPubKey = store.getKeyObservable('key-moderator', '');
+    mod.counterPubKey = store.getKeyObservable('key-counter', '');
+
     /* Views. */
 
     mod.PublicKeyEditor = function (key) {

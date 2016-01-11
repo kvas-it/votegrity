@@ -48,6 +48,14 @@
         }
     });
 
+    /* Initialise crypto with password from authentication. */
+    auth.initKeys = function () {
+        if (crypto.keyPair || !auth.password) {
+            return;
+        }
+        return crypto.initKeys(auth.password);
+    };
+
     /* Authenticate with the password from URL. */
     auth.init = function () {
         var token = utils.extractPasswordFromUrl();

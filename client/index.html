@@ -195,14 +195,17 @@
           <span data-bind="text: ballotsCount">0</span>
         </p>
 
-        <button data-bind="visible: canIssue, click: unlock">issue ballots</button>
+        <div data-bind="visible: canIssue">
+          <button data-bind="click: unlock">issue ballots</button>
 
-        <div data-bind="visible: unlocked">
-          <p>
-            Ballots to issue:
-            <span data-bind="text: toIssue">0</span>
-          </p>
-          <button data-bind="click: issue">Confirm issuance</button>
+          <div data-bind="visible: unlocked">
+            <p>
+              Ballots to issue:
+              <span data-bind="text: toIssue">0</span>
+            </p>
+            <button data-bind="click: issueOne">Issue one</button>
+            <button data-bind="click: issueAll">Issue all</button>
+          </div>
         </div>
       </div>
 

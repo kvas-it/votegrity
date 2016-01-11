@@ -188,6 +188,8 @@ describe('Store key model', function () {
 
 describe('Store key map', function () {
 
+    'use strict';
+
     var mocking = window.registry.mocking;
     var store = window.registry.store;
 
@@ -231,5 +233,45 @@ describe('Store key map', function () {
         store.loadKey('a');
         store.setAccessToken(undefined);
         store.all().should.be.eql({});
+    });
+
+});
+
+describe('Store value observable', function () {
+
+    'use strict';
+
+    var mocking = window.registry.mocking;
+    var store = window.registry.store;
+
+    var storeMock;
+    var a;
+
+    beforeEach(function () {
+        storeMock = mocking.mockStore();
+        a = store.getKeyObservable('a');
+        return storeMock.set('a', '123');
+    });
+
+    afterEach(mocking.unmockAll);
+
+    it('should load the value', function () {
+        a().should.be.eql('123');
+    });
+
+    it('should update the value', function () {
+        return storeMock.set('a', '456')
+            .then(function () {
+                a().should.be.eql('456');
+            });
+    });
+
+    it('should return default value', function () {
+        var b = store.getKeyObservable('b', '789');
+        b().should.be.eql('789');
+        return storeMock.set('b', '456')
+            .then(function () {
+                b().should.be.eql('456');
+            });
     });
 });

@@ -67,8 +67,7 @@
         if (parsed.publicKey !== utils.unwrapData(publicKey)) {
             throw Error('Wrong public key in signature');
         }
-        if (
-                !crypto.verifySignature(
+        if (!crypto.verifySignature(
                     parsed.plainText, parsed.signature, parsed.publicKey)) {
             throw Error('Signature verification failed');
         }

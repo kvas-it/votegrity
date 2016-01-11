@@ -160,7 +160,7 @@
      * it will return ``undefined`` and initiate the loading.
      *
      * This method is intended for computed observables -- they will be updated
-     * when the value is loaded.
+     * when the value is loaded. For normal functions use ``getKeyValueP``.
      */
     store.getKeyValue = function (key, defaultValue) {
         var value = store.getKeyModel(key).value();
@@ -169,6 +169,29 @@
         } else {
             return value;
         }
+    };
+
+    /* Return an observable for key value. */
+    store.getKeyObservable = function (key, defaultValue) {
+        return ko.pureComputed(function () {
+            return store.getKeyValue(key, defaultValue);
+        });
+    };
+
+    /*
+     * Return a promise to the key value that will be resolved immediately
+     * if the key is already loaded or when the loading is done.
+     */
+    store.getKeyValueP = function (key, defaultValue) {
+        var model = store.getKeyModel(key);
+        return model._promise.then(function () {
+            var value = model.value();
+            if (value === undefined) {
+                return defaultValue;
+            } else {
+                return value;
+            }
+        });
     };
 
     store.setAccessToken = function (token) {
