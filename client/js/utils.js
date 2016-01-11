@@ -112,4 +112,9 @@
         return lines.join('\n');
     };
 
+    /* Merge the wrapped data back into one line. */
+    utils.unwrapData = function (wrapped) {
+        return wrapped.replace('\n', '');
+    };
+
 })(this.registry);
