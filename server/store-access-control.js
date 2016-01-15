@@ -7,6 +7,7 @@
 var _ = require('lodash');
 
 var cu = require('./crypto-utils');
+var tu = require('./text-utils');
 
 function StoreAC(base) {
     _.bindAll(this);
@@ -16,10 +17,7 @@ function StoreAC(base) {
 StoreAC.prototype.loadAndParse = function (key, fields) {
     return this.base.read(key)
         .catch(() => '')
-        .then((data) => data.split('\n'))
-        .then((lines) => _.filter(lines, (l) => !_.startsWith(l, '#')))
-        .map((line) => line.split(':'))
-        .map((l) => _.mapValues(_.invert(fields), (v) => l[v]));
+        .then((data) => tu.parseCSV(data, fields));
 };
 
 StoreAC.prototype.loadUsers = function () {

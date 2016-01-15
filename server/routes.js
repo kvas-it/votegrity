@@ -7,13 +7,15 @@
 var express = require('express');
 
 var Store = require('./store');
+var addTriggers = require('./triggers');
 var StoreAC = require('./store-access-control');
 var StoreSync = require('./store-sync');
 var storeService = require('./store-service');
 
 function attachStore(app) {
     var store = new Store(app.get('storeRoot'));
-    var storeAC = new StoreAC(store);
+    var storeTriggers = addTriggers(store);
+    var storeAC = new StoreAC(storeTriggers);
     var storeSync = new StoreSync(storeAC);
     app.use('/api/store', storeService(storeSync));
 }
