@@ -2,4 +2,6 @@
  * Create module registry.
  */
 
-this.registry = {};
+'use strict';
+
+window.registry = {};
