@@ -6,6 +6,7 @@
 
     'use strict';
 
+    var cnst = registry.cnst;
     var utils = registry.utils;
     var crypto = registry.crypto;
     var store = registry.store;
@@ -13,42 +14,6 @@
     var auth = registry.auth;
 
     var cnt = registry.cnt = {};
-
-    cnt.separator = '\n==[separator]==[OcaC4P7HUg5g8t8aJdcnwhhC]==\n';
-
-    cnt.ballotsData = store.getKeyObservable('ballots', '');
-
-    /* Ballots bundle with signature checked and removed. */
-    cnt.ballotsText = ko.pureComputed(function () {
-        var data = cnt.ballotsData();
-        var cntPK = registry.mod.counterPubKey();
-
-        try {
-            return data ? crypto.signed2plain(data, cntPK) : '';
-        } catch (err) {
-            return 'CHECK FAILED';
-        }
-    });
-
-    /* Just the ballot tokens as an array. */
-    cnt.ballotTokens = ko.pureComputed(function () {
-        var text = cnt.ballotsText();
-
-        if (text) {
-            var t = text.split(cnt.separator);
-            if (t.length !== 3) {
-                return [];
-            }
-            return t[2].split('\n');
-        } else {
-            return [];
-        }
-    });
-
-    /* Count of the ballot tokens. */
-    cnt.ballotsCount = ko.pureComputed(function () {
-        return cnt.ballotTokens().length;
-    });
 
     cnt.makeTokens = function (count) {
         var tokens = [];
@@ -58,40 +23,66 @@
         return tokens;
     };
 
-    /* Issue ballots (from scratch or add to already issued). */
-    cnt.issueBallots = function (count) {
+    cnt.BallotIssuanceInfo = function (usersInfo) {
 
-        auth.initKeys();
+        var self = {};
 
-        var tokens = cnt.ballotTokens().concat(cnt.makeTokens(count));
-        var ballotsModel = store.getKeyModel('ballots');
+        /* Flag for ballot issuance. */
+        self.enabled = ko.pureComputed(function () {
+            var acl = store.getKeyValue('ballots.acl', '');
+            return acl.indexOf('counter:write') !== -1;
+        });
 
-        return utils.pJoin(
-            store.getKeyValueP('voting-descr', ''),
-            store.getKeyValueP('voting-options', ''),
-            function (descr, options) {
-                var ballotsText = descr + cnt.separator +
-                                  options + cnt.separator +
-                                  tokens.join('\n');
-                var ballotsData = crypto.sign(ballotsText);
+        /* Raw content of ``ballots`` key (normally signed by counter). */
+        self.ballotsData = store.getKeyObservable('ballots', '');
 
-                ballotsModel.value(ballotsData);
-                return ballotsModel.save();
-            });
+        /* Ballots bundle with signature checked and removed. */
+        self.ballotsText = ko.pureComputed(function () {
+            var data = self.ballotsData();
+            var cntPK = usersInfo.counterPubKey();
+            try {
+                return data ? crypto.signed2plain(data, cntPK) : '';
+            } catch (err) {
+                return 'CHECK FAILED';
+            }
+        });
+
+        /* The ballot tokens as an array. */
+        self.ballotTokens = ko.pureComputed(function () {
+            var text = self.ballotsText();
+            if (text) {
+                var t = text.split(cnst.ballotsSeparator);
+                if (t.length !== 3) {
+                    return [];
+                }
+                return t[2].split('\n');
+            } else {
+                return [];
+            }
+        });
+
+        /* Count of the ballot tokens. */
+        self.ballotsCount = ko.pureComputed(function () {
+            return self.ballotTokens().length;
+        });
+
+        return self;
     };
 
-    /* Ballot issuance view. */
-    cnt.BallotIssuance = function () {
+    cnt.BallotIssuanceView = function () {
 
-        var self = {
-            issuanceEnabled: registry.mod.ballotIssuanceEnabled,
-            votersCount: registry.mod.votersCount,
-            ballotsError: ko.pureComputed(function () {
-                return cnt.ballotsText() === 'CHECK FAILED';
-            }),
-            ballotsCount: cnt.ballotsCount,
-            unlocked: ko.observable(false)
-        };
+        var self = {unlocked: ko.observable(false)};
+
+        var users = registry.mod.UsersInfo();
+        var bii = cnt.BallotIssuanceInfo(users);
+
+        self.votersCount = users.votersCount;
+        self.ballotsCount = bii.ballotsCount;
+        self.issuanceEnabled = bii.enabled;
+
+        self.ballotsError = ko.pureComputed(function () {
+            return bii.ballotsText() === 'CHECK FAILED';
+        });
 
         self.status = ko.computed(function () {
             if (self.ballotsError()) {
@@ -115,19 +106,41 @@
             this.unlocked(true);
         };
 
+        /* Issue ballots (from scratch or add to already issued). */
+        self.issueBallots = function (count) {
+
+            auth.initKeys();
+
+            var tokens = bii.ballotTokens().concat(cnt.makeTokens(count));
+            var ballotsModel = store.getKeyModel('ballots');
+
+            return utils.pJoin(
+                store.getKeyValueP('voting-descr', ''),
+                store.getKeyValueP('voting-options', ''),
+                function (descr, options) {
+                    var ballotsText = descr + cnst.ballotsSeparator +
+                                      options + cnst.ballotsSeparator +
+                                      tokens.join('\n');
+                    var ballotsData = crypto.sign(ballotsText);
+
+                    ballotsModel.value(ballotsData);
+                    return ballotsModel.save();
+                });
+        };
+
         self.issueAll = function () {
-            return cnt.issueBallots(self.toIssue());
+            return self.issueBallots(self.toIssue());
         };
 
         self.issueOne = function () {
-            return cnt.issueBallots(1);
+            return self.issueBallots(1);
         };
 
         return self;
     };
 
     /* Counting view. */
-    cnt.Counting = function () {
+    cnt.CountingView = function () {
 
         var self = {};
 
@@ -142,8 +155,8 @@
 
         ui.setSubViews(self, {
             main: function () {return {};},
-            ballots: cnt.BallotIssuance,
-            counting: cnt.Counting
+            ballots: cnt.BallotIssuanceView,
+            counting: cnt.CountingView
         });
 
         self.menuItems = ui.makeMenu(self, [

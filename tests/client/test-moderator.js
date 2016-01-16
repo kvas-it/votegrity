@@ -65,7 +65,7 @@ describe('Voter list editor', function () {
 
     beforeEach(function () {
         storeMock = mocking.mockStore();
-        view = mod.Voters();
+        view = mod.VotersView();
     });
 
     afterEach(mocking.unmockAll);
@@ -73,14 +73,14 @@ describe('Voter list editor', function () {
     it('should load empty voters list', function () {
         return storeMock.set('users', list0)
             .then(function () {
-                mod.voterList().length.should.be.eql(0);
+                view.votersList().should.be.eql('');
             });
     });
 
     it('should load voters list', function () {
         return storeMock.set('users', list2)
             .then(function () {
-                mod.voterList().length.should.be.eql(2);
+                view.votersList().split('\n').length.should.be.eql(2);
             });
     });
 
@@ -91,7 +91,7 @@ describe('Voter list editor', function () {
                 return view.voterAdder.save();
             })
             .then(function () {
-                mod.voterList().length.should.be.eql(4);
+                view.votersList().split('\n').length.should.be.eql(4);
                 view.voterAdder.newVoters().should.be.eql('');
             });
     });
@@ -130,8 +130,8 @@ describe('Ballot management', function () {
 
     var mocking = window.registry.mocking;
     var crypto = window.registry.crypto;
+    var cnst = window.registry.cnst;
     var mod = window.registry.mod;
-    var cnt = window.registry.cnt;
 
     var users = '1:x:a@b.c:A:moderator\n5:y:b@c.d:B:voter\n8:z:c@d.e:C:voter';
     var storeMock;
@@ -142,10 +142,13 @@ describe('Ballot management', function () {
         storeMock = mocking.mockStore();
         return storeMock.setMany({
             users: users,
-            ballots: crypto.sign(cnt.separator + cnt.separator + 'token1')
+            ballots: crypto.sign(
+                cnst.ballotsSeparator +
+                cnst.ballotsSeparator +
+                'token1')
         })
         .then(function () {
-            view = mod.Ballots();
+            view = mod.BallotsView();
         });
     });
 

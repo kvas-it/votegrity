@@ -105,17 +105,25 @@
     };
 
     /* Replace real crypto with a fake version for testing. */
-    mocking.mockCrypto = function () {
+    mocking.mockCrypto = function (password) {
+
         mocking.mock('crypto.sign', function (text) {
             return text + '\nsigned';
         });
+
         mocking.mock('crypto.signed2plain', function (text) {
             return text.substring(0, text.length - 7);
         });
+
         mocking.mock('crypto.initKeys', function () {
             mocking.mock('crypto.publicKey', 'publicKey');
             mocking.mock('crypto.keyPair', 'keyPair');
         });
+
+        if (password) {
+            // Authentication is needed for initialising the keys.
+            registry.auth.authenticate(password);
+        }
     };
 
 })(this.registry);
