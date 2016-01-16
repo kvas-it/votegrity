@@ -227,12 +227,70 @@
         return self;
     };
 
+    mod.ballotState = store.getKeyObservable('ballot-state', '');
+    mod.ballotStates = ko.pureComputed(function () {
+        var data = mod.ballotState();
+        return utils.parseData(data, ['id', 'token', 'state']);
+    });
+
+    mod.distributeBallot = function (voterId, ballotToken) {
+        return utils.pAll([
+            store.write('ballot-' + voterId, ballotToken),
+            store.write('ballot-' + voterId + '.acl', voterId + ':read')
+        ]);
+    };
+
     mod.Ballots = function () {
-        return {
+
+        var self = {
             issuanceSwitch: mod.IssuanceSwitch(),
             votersCount: mod.votersCount,
-            ballotsCount: registry.cnt.ballotsCount
+            ballotsCount: registry.cnt.ballotsCount,
+            distrBallotsCount: ko.pureComputed(function () {
+                return mod.ballotStates().length;
+            })
         };
+
+        self.remainingVotersCount = ko.pureComputed(function () {
+            return self.votersCount() - self.distrBallotsCount();
+        });
+
+        self.remainingBallotsCount = ko.pureComputed(function () {
+            return self.ballotsCount() - self.distrBallotsCount();
+        });
+
+        self.ballotsToDistribute = ko.pureComputed(function () {
+            return Math.min(self.remainingVotersCount(),
+                            self.remainingBallotsCount());
+        });
+
+        self.canDistribute = ko.pureComputed(function () {
+            return self.ballotsToDistribute() > 0;
+        });
+
+        self.distributeBallots = function () {
+
+            var tokens = registry.cnt.ballotTokens();
+            var voters = mod.voterList();
+            var count = Math.min(tokens.length, voters.length);
+            var promise = utils.pResolve(0);
+
+            function makeDistributor(id, token) {
+                return function () {
+                    return mod.distributeBallot(id, token);
+                };
+            }
+
+            for (var i = 0; i < count; i++) {
+                promise = promise.then(makeDistributor(voters[i].id, tokens[i]));
+            }
+
+            return promise.then(function () {
+                return store.loadKey('ballot-state', true);
+            });
+        };
+
+        return self;
     };
 
     mod.View = function () {

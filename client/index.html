@@ -130,6 +130,11 @@
       <div data-bind="with: info">
         <h1>Voting configuration</h1>
 
+        <p class="info" data-bind="visible: !generalInfo().editable()">
+          This information cannot be edited because ballots have been
+          already issued.
+        </p>
+
         <p data-bind="with: generalInfo">
           General information about the voting
           <button data-bind="visible: editable, click: save">save</button>
@@ -153,8 +158,7 @@
         <h1>Ballot management</h1>
 
         <p class="info">
-          Note: Enabling ballot issuance disables voting list and voting
-          configuration.
+          Note: Enabling ballot issuance voting configuration.
         </p>
 
         <p data-bind="with: issuanceSwitch">
@@ -172,7 +176,25 @@
           Ballots issued:
           <span data-bind="text: ballotsCount">0</span>
         </p>
+        <p>
+          Ballots distributed to voters:
+          <span data-bind="text:distrBallotsCount">0</span>
+        </p>
+        <p>
+          Voters without ballots:
+          <span data-bind="text: remainingVotersCount">0</span>
+        </p>
+        <p>
+          Ballots remaining:
+          <span data-bind="text: remainingBallotsCount">0</span>
+        </p>
+        <p>
+          Ballots to distribute:
+          <span data-bind="text: remainingBallotsCount">0</span>
+          <button data-bind="visible: canDistribute, click: distributeBallots">distribute</button>
+        </p>
       </div>
+
      </div>
     </div>
 

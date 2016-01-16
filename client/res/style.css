@@ -62,8 +62,8 @@ a.menu-item:hover {
     margin-top: 40px;
 }
 
-#mod-voter-list {
-    height: 300px;
+#mod-voter-list, #mod-ballot-distr {
+    height: 400px;
     width: 600px;
     overflow: auto;
 }

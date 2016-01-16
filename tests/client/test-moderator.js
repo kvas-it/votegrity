@@ -124,4 +124,56 @@ describe('Voter list editor', function () {
 
 // TODO: tests for voting information.
 
-// TODO: tests for ballot management.
+describe('Ballot management', function () {
+
+    'use strict';
+
+    var mocking = window.registry.mocking;
+    var crypto = window.registry.crypto;
+    var mod = window.registry.mod;
+    var cnt = window.registry.cnt;
+
+    var users = '1:x:a@b.c:A:moderator\n5:y:b@c.d:B:voter\n8:z:c@d.e:C:voter';
+    var storeMock;
+    var view;
+
+    beforeEach(function () {
+        mocking.mockCrypto();
+        storeMock = mocking.mockStore();
+        return storeMock.setMany({
+            users: users,
+            ballots: crypto.sign(cnt.separator + cnt.separator + 'token1')
+        })
+        .then(function () {
+            view = mod.Ballots();
+        });
+    });
+
+    afterEach(mocking.unmockAll);
+
+    it('should display stats', function () {
+        view.issuanceSwitch.enabled().should.be.eql(false);
+        view.votersCount().should.be.eql(2);
+        view.ballotsCount().should.be.eql(1);
+        view.distrBallotsCount().should.be.eql(0);
+        view.remainingVotersCount().should.be.eql(2);
+        view.remainingBallotsCount().should.be.eql(1);
+        view.ballotsToDistribute().should.be.eql(1);
+        view.canDistribute().should.be.eql(true);
+    });
+
+    it('should enable ballot issuance', function () {
+        return view.issuanceSwitch.enable().then(function () {
+            view.issuanceSwitch.enabled().should.be.eql(true);
+        });
+    });
+
+    it('should issue ballots', function () {
+        return view.distributeBallots().then(function () {
+            storeMock.get('ballot-5').should.be.eql('token1');
+            storeMock.get('ballot-5.acl').should.be.eql('5:read');
+            // storeMock.get('ballot-5-filled.acl').should.startWith('5:writeOnce');
+        });
+    });
+
+});

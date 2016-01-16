@@ -140,11 +140,14 @@
     store.all = ko.observable({});
 
     /* Add key to the loaded keys. */
-    store.loadKey = function (key) {
+    store.loadKey = function (key, forceReload) {
         var all = store.all();
         if (!(key in all)) {
             all[key] = store.Key(key);
             store.all(all);
+            return all[key]._promise;
+        } else if (forceReload) {
+            return all[key].load();
         }
     };
 
