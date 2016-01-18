@@ -4,6 +4,8 @@
 
 'use strict';
 
+var P = require('bluebird');
+
 var StoreTriggers = require('./store-triggers');
 var tu = require('./text-utils');
 
@@ -47,8 +49,12 @@ var ballotDistrTrigger = {
     after: (store, key, value) => {
         var t = key.split('-');
         var userId = t[1];
-        return processCSVKeyValue(store, 'ballots-state',
-            (recs) => setBallotRecord(recs, userId, value, 'distributed'));
+        return P.all([
+            processCSVKeyValue(store, 'ballots-state',
+                (recs) => setBallotRecord(recs, userId, value, 'distributed')),
+            store.write('ballot-' + userId + '-filled.acl',
+                userId + ':write-once@' + String(Date.now()))
+        ]);
     }
 };
 
