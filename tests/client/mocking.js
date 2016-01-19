@@ -112,6 +112,9 @@
         });
 
         mocking.mock('crypto.signed2plain', function (text) {
+            if (text.substring(text.length - 7) !== '\nsigned') {
+                throw Error('Signature verification failed');
+            }
             return text.substring(0, text.length - 7);
         });
 

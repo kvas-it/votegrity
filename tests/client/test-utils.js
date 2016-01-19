@@ -52,5 +52,25 @@ describe('Utils', function () {
             results.should.be.eql([]);
         });
     });
+
+    it('should do koAttr', function () {
+        var a = ko.observable();
+        var b = utils.koAttr(a, 'a', 1);
+        b().should.be.eql(1);
+        a({a: 2});
+        b().should.be.eql(2);
+        a({b: 1});
+        b().should.be.eql(1);
+    });
+
+    it('should do koLength', function () {
+        var a = ko.observable();
+        var aLen = utils.koLength(a);
+        aLen().should.be.eql(0);
+        a('abc');
+        aLen().should.be.eql(3);
+        a([1, 2]);
+        aLen().should.be.eql(2);
+    });
 });
 

@@ -117,4 +117,23 @@
         return wrapped.replace(/\n/g, '');
     };
 
+    /* Derive computed from observable by taking its attribute. */
+    utils.koAttr = function (observable, attrName, defaultValue) {
+        return ko.pureComputed(function () {
+            var observableValue = observable();
+            if (observableValue) {
+                var attrValue = observableValue[attrName];
+                if (attrValue !== undefined) {
+                    return attrValue;
+                }
+            }
+            return defaultValue;
+        });
+    };
+
+    /* Derive computed from observable by taking its length. */
+    utils.koLength = function (observable) {
+        return utils.koAttr(observable, 'length', 0);
+    };
+
 })(this.registry);
