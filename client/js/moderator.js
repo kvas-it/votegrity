@@ -239,7 +239,7 @@
                         return utils.pAll([keyModel.save(), aclModel.save()]);
                     },
                     editable: ko.pureComputed(function () {
-                        return bii.enabled() && bii.ballotsCount() === 0;
+                        return bii.ballotsCount() === 0;
                     })
                 };
             });
@@ -331,7 +331,7 @@
             }
 
             return promise.then(function () {
-                return store.loadKey('ballot-state', true);
+                return store.loadKey('ballots-state', true);
             });
         };
 
