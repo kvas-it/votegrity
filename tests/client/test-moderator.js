@@ -129,8 +129,6 @@ describe('Ballot management', function () {
     'use strict';
 
     var mocking = window.registry.mocking;
-    var crypto = window.registry.crypto;
-    var cnst = window.registry.cnst;
     var mod = window.registry.mod;
 
     var users = '1::::moderator\n' +
@@ -141,17 +139,12 @@ describe('Ballot management', function () {
     var storeMock;
     var view;
 
-    function makeBallotsData(ballots) {
-        var prefix = cnst.ballotsSeparator + cnst.ballotsSeparator;
-        return crypto.sign(prefix + ballots);
-    }
-
     beforeEach(function () {
         mocking.mockCrypto();
         storeMock = mocking.mockStore();
         return storeMock.setMany({
             users: users,
-            ballots: makeBallotsData('A\nB')
+            ballots: mocking.makeBallotsData('', '', 'A\nB')
         })
         .then(function () {
             view = mod.BallotsView();
@@ -188,7 +181,7 @@ describe('Ballot management', function () {
 
     it('should distribute ballots wisely', function () {
         return storeMock.setMany({
-            ballots: makeBallotsData('A\nB\nC'),
+            ballots: mocking.makeBallotsData('', '', 'A\nB\nC'),
             'ballots-state': '3:B:distributed'
         })
         .then(function () {

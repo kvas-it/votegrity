@@ -47,23 +47,38 @@
             }
         });
 
-        /* The ballot tokens as an array. */
-        self.ballotTokens = ko.pureComputed(function () {
+        /* Components of ballots bundle: text, options, tokens. */
+        self.ballotTextParts = ko.pureComputed(function () {
             var text = self.ballotsText();
             if (text) {
                 var t = text.split(cnst.ballotsSeparator);
-                if (t.length !== 3) {
-                    return [];
+                if (t.length === 3) {
+                    return t;
                 }
-                return t[2].split('\n');
+            }
+            return [];
+        });
+
+        /* The ballot tokens as an array. */
+        self.ballotTokens = ko.pureComputed(function () {
+            var tokensText = self.ballotTextParts()[2];
+            if (tokensText) {
+                return tokensText.split('\n');
             } else {
                 return [];
             }
         });
 
         /* Count of the ballot tokens. */
-        self.ballotsCount = ko.pureComputed(function () {
-            return self.ballotTokens().length;
+        self.ballotsCount = utils.koLength(self.ballotTokens);
+
+        self.votingOptions = ko.pureComputed(function () {
+            var optionsText = self.ballotTextParts()[1];
+            if (optionsText) {
+                return optionsText.split('\n');
+            } else {
+                return [];
+            }
         });
 
         return self;

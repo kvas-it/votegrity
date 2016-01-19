@@ -6,6 +6,8 @@
 
     'use strict';
 
+    var cnst = registry.cnst;
+    var crypto = registry.crypto;
     var utils = registry.utils;
     var store = registry.store;
 
@@ -107,6 +109,10 @@
     /* Replace real crypto with a fake version for testing. */
     mocking.mockCrypto = function (password) {
 
+        mocking.mock('crypto.encrypt', function (text, key) {
+            return text + '\nencrypted with ' + key;
+        });
+
         mocking.mock('crypto.sign', function (text) {
             return text + '\nsigned';
         });
@@ -127,6 +133,14 @@
             // Authentication is needed for initialising the keys.
             registry.auth.authenticate(password);
         }
+    };
+
+    /* Generate mock ballot list. */
+    mocking.makeBallotsData = function (descr, options, ballots) {
+        var text = descr + cnst.ballotsSeparator +
+                   options + cnst.ballotsSeparator +
+                   ballots;
+        return crypto.sign(text);
     };
 
 })(this.registry);
