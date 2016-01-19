@@ -39,11 +39,14 @@
         return self;
     };
 
-    mod.BallotDistributionInfo = function () {
+    mod.BallotDistributionInfo = function (usersInfo, ballotIssuanceInfo) {
+
+        var users = usersInfo;
+        var bii = ballotIssuanceInfo;
 
         var self = {};
 
-        self.ballotState = store.getKeyObservable('ballot-state', '');
+        self.ballotState = store.getKeyObservable('ballots-state', '');
 
         self.ballotStates = ko.pureComputed(function () {
             var data = self.ballotState();
@@ -52,6 +55,26 @@
 
         self.distrBallotsCount = ko.pureComputed(function () {
             return self.ballotStates().length;
+        });
+
+        self.remainingBallots = ko.pureComputed(function () {
+            var distributed = {};
+            self.ballotStates().forEach(function (bs) {
+                distributed[bs.token] = 1;
+            });
+            return bii.ballotTokens().filter(function (token) {
+                return !(token in distributed);
+            });
+        });
+
+        self.remainingVoters = ko.pureComputed(function () {
+            var withBallots = {};
+            self.ballotStates().forEach(function (bs) {
+                withBallots[bs.id] = 1;
+            });
+            return users.voterList().filter(function (voter) {
+                return !(voter.id in withBallots);
+            });
         });
 
         return self;
@@ -260,7 +283,7 @@
 
         var users = mod.UsersInfo();
         var bii = registry.cnt.BallotIssuanceInfo(users);
-        var bdi = mod.BallotDistributionInfo();
+        var bdi = mod.BallotDistributionInfo(users, bii);
 
         var self = {
             issuanceSwitch: mod.IssuanceSwitch(bii),
@@ -286,28 +309,25 @@
             return self.ballotsToDistribute() > 0;
         });
 
-        self.distributeBallot = function (voterId, ballotToken) {
-            return utils.pAll([
-                store.write('ballot-' + voterId, ballotToken),
-                store.write('ballot-' + voterId + '.acl', voterId + ':read')
-            ]);
-        };
-
         self.distributeBallots = function () {
 
-            var tokens = bii.ballotTokens();
-            var voters = users.voterList();
-            var count = Math.min(tokens.length, voters.length);
-            var promise = utils.pResolve(0);
+            var ballots = bdi.remainingBallots();
+            var voters = bdi.remainingVoters();
+            var count = self.ballotsToDistribute();
 
-            function makeDistributor(id, token) {
-                return function () {
-                    return self.distributeBallot(id, token);
-                };
+            var promise = utils.pResolve();
+
+            function distributeOne(id, ballot) {
+                promise = promise.then(function () {
+                    return utils.pAll([
+                        store.write('ballot-' + id, ballot),
+                        store.write('ballot-' + id + '.acl', id + ':read')
+                    ]);
+                });
             }
 
             for (var i = 0; i < count; i++) {
-                promise = promise.then(makeDistributor(voters[i].id, tokens[i]));
+                distributeOne(voters[i].id, ballots[i]);
             }
 
             return promise.then(function () {

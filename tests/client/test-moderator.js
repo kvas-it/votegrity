@@ -133,19 +133,25 @@ describe('Ballot management', function () {
     var cnst = window.registry.cnst;
     var mod = window.registry.mod;
 
-    var users = '1:x:a@b.c:A:moderator\n5:y:b@c.d:B:voter\n8:z:c@d.e:C:voter';
+    var users = '1::::moderator\n' +
+                '2::::voter\n' +
+                '3::::voter\n' +
+                '4::::voter\n' +
+                '5::::voter';
     var storeMock;
     var view;
+
+    function makeBallotsData(ballots) {
+        var prefix = cnst.ballotsSeparator + cnst.ballotsSeparator;
+        return crypto.sign(prefix + ballots);
+    }
 
     beforeEach(function () {
         mocking.mockCrypto();
         storeMock = mocking.mockStore();
         return storeMock.setMany({
             users: users,
-            ballots: crypto.sign(
-                cnst.ballotsSeparator +
-                cnst.ballotsSeparator +
-                'token1')
+            ballots: makeBallotsData('A\nB')
         })
         .then(function () {
             view = mod.BallotsView();
@@ -156,12 +162,12 @@ describe('Ballot management', function () {
 
     it('should display stats', function () {
         view.issuanceSwitch.enabled().should.be.eql(false);
-        view.votersCount().should.be.eql(2);
-        view.ballotsCount().should.be.eql(1);
+        view.votersCount().should.be.eql(4);
+        view.ballotsCount().should.be.eql(2);
         view.distrBallotsCount().should.be.eql(0);
-        view.remainingVotersCount().should.be.eql(2);
-        view.remainingBallotsCount().should.be.eql(1);
-        view.ballotsToDistribute().should.be.eql(1);
+        view.remainingVotersCount().should.be.eql(4);
+        view.remainingBallotsCount().should.be.eql(2);
+        view.ballotsToDistribute().should.be.eql(2);
         view.canDistribute().should.be.eql(true);
     });
 
@@ -171,11 +177,26 @@ describe('Ballot management', function () {
         });
     });
 
-    it('should issue ballots', function () {
+    it('should distribute ballots', function () {
         return view.distributeBallots().then(function () {
-            storeMock.get('ballot-5').should.be.eql('token1');
-            storeMock.get('ballot-5.acl').should.be.eql('5:read');
-            // storeMock.get('ballot-5-filled.acl').should.startWith('5:writeOnce');
+            storeMock.get('ballot-2').should.be.eql('A');
+            storeMock.get('ballot-2.acl').should.be.eql('2:read');
+            storeMock.get('ballot-3').should.be.eql('B');
+            storeMock.get('ballot-3.acl').should.be.eql('3:read');
+        });
+    });
+
+    it('should distribute ballots wisely', function () {
+        return storeMock.setMany({
+            ballots: makeBallotsData('A\nB\nC'),
+            'ballots-state': '3:B:distributed'
+        })
+        .then(function () {
+            return view.distributeBallots();
+        })
+        .then(function () {
+            storeMock.get('ballot-2').should.be.eql('A');
+            storeMock.get('ballot-4').should.be.eql('C');
         });
     });
 
