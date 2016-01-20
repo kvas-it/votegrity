@@ -130,7 +130,10 @@
             var encrText = crypto.encrypt(voteText, users.counterPubKey());
             return store.write(voi.filledBallotKey(), encrText)
                 .then(function () {
-                    return store.loadKey(voi.filledBallotKey(), true);
+                    return utils.pAll([
+                        store.loadKey(voi.filledBallotKey(), true),
+                        store.loadKey('ballots-in', true)
+                    ]);
                 },
                 function fail(err) {
                     if (err.message === 'Access denied') {
@@ -186,7 +189,12 @@
     };
 
     vot.ProgressView = function () {
-        return {};
+
+        var users = registry.mod.UsersInfo();
+        var bii = registry.cnt.BallotIssuanceInfo(users);
+        var bdi = registry.mod.BallotDistributionInfo(users, bii);
+
+        return {usedBallots: bdi.ballotsIn};
     };
 
     vot.ResultsView = function () {

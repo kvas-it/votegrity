@@ -351,6 +351,20 @@
         </ul>
       </div>
 
+      <!-- voting progress -->
+      <div data-bind="with: progress">
+        <h1>Submitted ballots</h1>
+
+        <p>
+          Below are the ballot tokens from submitted ballots. You can
+          search the page with Ctrl+F to find yours.
+        </p>
+
+        <ul data-bind="foreach: usedBallots">
+          <li data-bind="text: token">&nbsp;</li>
+        </ul>
+      </div>
+
      </div>
     </div>
 

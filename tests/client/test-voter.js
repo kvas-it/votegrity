@@ -140,7 +140,7 @@ describe('Voting UI', function () {
 
 });
 
-describe.only('Voting info views', function () {
+describe('Voting info views', function () {
 
     'use strict';
 
@@ -163,7 +163,8 @@ describe.only('Voting info views', function () {
         return storeMock.setMany({
             'key-counter': 'cntkey',
             users: users,
-            ballots: mocking.makeBallotsData('', 'a\nb', 'A')
+            ballots: mocking.makeBallotsData('', 'a\nb', 'A'),
+            'ballots-in': 'a\nb'
         });
     });
 
@@ -177,6 +178,11 @@ describe.only('Voting info views', function () {
             {name: 'C', email: 'c@d.e'},
             {name: 'Y', email: 'b@c.d'}
         ]);
+    });
+
+    it('should show used ballots', function () {
+        var view = vot.ProgressView();
+        view.usedBallots().should.be.eql([{token:'a'}, {token:'b'}]);
     });
 
 });
