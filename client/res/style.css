@@ -23,7 +23,7 @@ textarea {
     margin: 5px 0px;
 }
 
-input {
+input[type="text"], input[type="password"] {
     width: 200px;
 }
 
@@ -71,6 +71,10 @@ a.menu-item:hover {
 #auth-form {
     margin-left: 100px;
     margin-top: 100px;
+}
+
+.error {
+    color: red;
 }
 
 #error {

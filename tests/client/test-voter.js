@@ -19,6 +19,9 @@ describe('Voting UI', function () {
         storeMock = mocking.mockStore();
         mocking.mockCrypto('123');
         mocking.mock('auth.htoken', 'y'); // Authenticate as 5.
+        mocking.mock('crypto.genToken', function () {
+            return 'abc';
+        });
         view = vot.VotingView();
         return storeMock.setMany({
             'key-counter': 'cntkey',
@@ -38,7 +41,7 @@ describe('Voting UI', function () {
         return storeMock.set('ballot-5', 'A')
         .then(function () {
             view.haveBallot().should.be.eql(true);
-            view.state().should.be.eql('no token');
+            view.state().should.be.eql('');
         });
     });
 
@@ -58,45 +61,25 @@ describe('Voting UI', function () {
         .then(function () {
             view.haveBallot().should.be.eql('CHECK FAILED');
             view.state().should.be.eql('invalid ballot');
-            view.votingOptions().should.be.eql([]);
-        });
-    });
-
-    it('should generate voter token', function () {
-        return storeMock.set('ballot-5', 'A')
-        .then(function () {
-            view.voterToken().should.be.eql('');
-            view.state().should.be.eql('no token');
-            view.genVoterToken();
-            view.voterToken().length.should.be.eql(30);
-            view.state().should.be.eql('');
+            view.options().should.be.eql([]);
         });
     });
 
     it('should get voting options', function () {
-        view.votingOptions().should.be.eql(['a', 'b']);
+        view.options().should.be.eql(['a', 'b']);
     });
 
     it('should vote', function () {
         return storeMock.set('ballot-5', 'A')
         .then(function () {
-            view.voterToken('abc');
-            return view.vote('a');
+            view.vote('a');
+            return view.submit();
         })
         .then(function () {
+            view.voterToken().should.be.eql('abc');
             view.state().should.be.eql('voted');
             storeMock.get('ballot-5-filled')
                 .should.be.eql(crypto.encrypt('A\nabc\na', 'cntkey'));
-        });
-    });
-
-    it('should not vote without voter token', function () {
-        return storeMock.set('ballot-5', 'A')
-        .then(function () {
-            return view.vote('a');
-        })
-        .then(function () {
-            view.state().should.be.eql('no token error');
         });
     });
 
@@ -106,8 +89,8 @@ describe('Voting UI', function () {
         });
         return storeMock.set('ballot-5', 'A')
         .then(function () {
-            view.voterToken('abc');
-            return view.vote('a');
+            view.vote('a');
+            return view.submit();
         })
         .then(function () {
             view.state().should.be.eql('already voted');
@@ -120,8 +103,8 @@ describe('Voting UI', function () {
         });
         return storeMock.set('ballot-5', 'A')
         .then(function () {
-            view.voterToken('abc');
-            return view.vote('a');
+            view.vote('a');
+            return view.submit();
         })
         .then(function () {
             view.state().should.be.eql('disconnected');
@@ -131,13 +114,13 @@ describe('Voting UI', function () {
     it('should allow empty votes', function () {
         return storeMock.set('ballot-5', 'A')
         .then(function () {
-            view.voterToken('abc');
-            return view.vote('');
+            view.vote('EMPTY');
+            return view.submit();
         })
         .then(function () {
             view.state().should.be.eql('voted');
             storeMock.get('ballot-5-filled')
-                .should.be.eql(crypto.encrypt('A\nabc\n', 'cntkey'));
+                .should.be.eql(crypto.encrypt('A\nabc\nEMPTY', 'cntkey'));
         });
     });
 

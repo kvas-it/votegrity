@@ -25,6 +25,10 @@ StoreTriggers.prototype.write = function (key, value, accessToken) {
             .then(() => this.fireTriggers('after', 'write', key, value, accessToken)));
 };
 
+StoreTriggers.prototype.getTimeStamp = function (key, accessToken) {
+    return this.base.getTimeStamp(key, accessToken);
+};
+
 StoreTriggers.prototype.fireTriggers = function (when, op, key, value, accessToken) {
 
     var triggers = this.triggers.filter((t) => t.match(op, key));

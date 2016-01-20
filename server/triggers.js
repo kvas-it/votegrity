@@ -53,7 +53,7 @@ var ballotDistrTrigger = {
             processCSVKeyValue(store, 'ballots-state',
                 (recs) => setBallotRecord(recs, userId, value, 'distributed')),
             store.write('ballot-' + userId + '-filled.acl',
-                userId + ':write-once@' + String(Date.now()))
+                userId + ':read\n' + userId + ':write-once@' + String(Date.now()))
         ]);
     }
 };

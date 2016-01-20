@@ -246,10 +246,75 @@
 
     <div data-bind="with: voter">
      <div id="voter-ui">
-      <!-- main state for voter -->
-      <div id="vot-main" class="hidden">
-        You're a voter.
+
+      <!-- voting view -->
+      <div data-bind="with: voting">
+        <p data-bind="visible: state() === 'no ballot'">
+          The voting is being prepared. Your ballot is not issued yet.
+        </p>
+
+        <p class="error" data-bind="visible: state() === 'invalid ballot'">
+          Your ballot is invalid. Please contact vote administrators for
+          further information.
+        </p>
+
+        <p class="error" data-bind="visible: state() === 'already voted'">
+          Your ballot seems to have been used already.
+          Please contact vote administrators for further information.
+        </p>
+
+        <p class="error" data-bind="visible: state() === 'disconnected'">
+          Server seems to be down. Please retry later.
+        </p>
+
+        <div data-bind="visible: state() === 'voted'">
+          <p data-bind="visible: voterToken">
+            Thank you for your vote.<br/><br/>
+            Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.<br/>
+            Your voter code is <b data-bind="text: voterToken">&nbsp;</b>.<br/>
+          </p>
+          <p data-bind="visible: !voterToken()">
+            You have already voted.<br/><br/>
+            Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.
+          </p>
+          <p class="info">
+            The ballot code can be used to verify that your ballot has
+            been accepted.
+            The voter code can be used to verify how your vote was counted.
+            Save both codes and don't disclose them to anyone &mdash; they
+            can be used to discover how you voted.
+          </p>
+        </div>
+
+        <div data-bind="visible: haveBallot() === true">
+          <p data-bind="text: info"></p>
+
+          <div data-bind="foreach: options">
+            <label>
+              <input type="radio" name="vote"
+                data-bind="checked: $parent.vote, value: $data,
+                           enable: $parent.enableOptions" />
+              <span data-bind="text: $data">&nbsp;</span>
+            </label>
+            <br/>
+          </div>
+
+          <p>
+            <label>
+              <input type="radio" name="vote" value="EMPTY"
+                data-bind="checked: vote, enable: enableOptions" />
+              <span>No vote</span>
+            </label>
+          </p>
+
+          <div>
+            <button data-bind="click: submit, visible: enableSubmit">
+              Submit vote
+            </button>
+          </div>
+        </div>
       </div>
+
      </div>
     </div>
 

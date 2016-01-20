@@ -59,6 +59,9 @@
             return [];
         });
 
+        /* Vote description. */
+        self.voteInfo = utils.koAttr(self.ballotTextParts, 0, '');
+
         /* The ballot tokens as an array. */
         self.ballotTokens = ko.pureComputed(function () {
             var tokensText = self.ballotTextParts()[2];

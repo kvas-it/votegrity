@@ -56,8 +56,15 @@ StoreMock.prototype.read = function (key, accessToken) {
 };
 
 StoreMock.prototype.getTimeStamp = function (key, accessToken) {
-    return this.exec(() => this.timestamps[key] || this.start,
-            't', key, false, accessToken);
+    return this.exec(() => {
+        if (key in this.timestamps) {
+            return this.timestamps[key];
+        }
+        if (key in this.data) {
+            return this.start;
+        }
+        throw Error('Missing key: ' + key);
+    }, 't', key, false, accessToken);
 };
 
 StoreMock.prototype.write = function (key, value, accessToken) {

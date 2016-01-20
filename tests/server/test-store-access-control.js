@@ -48,7 +48,8 @@ describe('Key-value store access control', function () {
                 d: 'yo!',
                 'd.acl': 'counter:write\nvoter:read',
                 e: 'yo!',
-                'e.acl': '*:read'
+                'e.acl': '*:read',
+                'f.acl': v1[0] + ':write-once@1451948604276'
             },
             start: new Date(2000, 1, 1)
         });
@@ -132,6 +133,7 @@ describe('Key-value store access control', function () {
 
     it('should allow writing once', function () {
         return P.all([
+            ac.write('f', '1', v1AT),
             ac.write('c', '1', v1AT),
             ac.write('c', '1', v1AT).then(fail).catch(accessDenied)
         ]);

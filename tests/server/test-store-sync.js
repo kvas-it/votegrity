@@ -16,7 +16,7 @@ describe('Key-value store synchroniser', function () {
     var ss;
 
     beforeEach(function () {
-        store = new StoreMock({delay: 3, record: true});
+        store = new StoreMock({delay: 3, record: true, data: {a: '', b: ''}});
         ss = new StoreSync(store);
     });
 

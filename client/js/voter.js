@@ -32,6 +32,11 @@
             return self.ballotKey() + '-filled';
         });
 
+        self.filledBallot = ko.pureComputed(function () {
+            var key = self.filledBallotKey();
+            return store.getKeyValue(key);
+        });
+
         self.ballotToken = ko.pureComputed(function () {
             var userId = self.userId();
             return store.getKeyValue('ballot-' + userId);
@@ -64,10 +69,14 @@
 
         var self = {
             haveBallot: voi.haveBallot,
-            votingOptions: bii.votingOptions,
+            info: bii.voteInfo,
+            options: bii.votingOptions,
+            ballotToken: voi.ballotToken,
             voterToken: ko.observable(''),
-            voted: ko.observable(false),
-            noTokenError: ko.observable(false),
+            vote: ko.observable(),
+            voted: ko.pureComputed(function () {
+                return voi.filledBallot() !== undefined;
+            }),
             votedError: ko.observable(false),
             disconnected: ko.observable(false)
         };
@@ -83,29 +92,36 @@
                 return 'no ballot';
             } else if (self.haveBallot() === 'CHECK FAILED') {
                 return 'invalid ballot';
-            } else if (self.noTokenError()) {
-                return 'no token error';
-            } else if (!self.voterToken()) {
-                return 'no token';
             } else {
                 return '';
             }
         });
 
-        self.genVoterToken = function () {
-            self.voterToken(crypto.genToken());
-        };
+        self.enableOptions = ko.pureComputed(function () {
+            return self.state() === '';
+        });
 
-        self.vote = function (vote) {
-            if (!self.voterToken()) {
-                self.noTokenError(true);
+        self.enableSubmit = ko.pureComputed(function () {
+            return self.state() === '' && self.vote();
+        });
+
+        self.submit = function () {
+
+            if (!self.vote()) {
                 return utils.pAll([]);
             }
-            var voteText = [voi.ballotToken(), self.voterToken(), vote].join('\n');
+
+            self.voterToken(crypto.genToken());
+
+            var voteText = [
+                voi.ballotToken(),
+                self.voterToken(),
+                self.vote()
+            ].join('\n');
             var encrText = crypto.encrypt(voteText, users.counterPubKey());
             return store.write(voi.filledBallotKey(), encrText)
                 .then(function () {
-                    self.voted(true);
+                    return store.loadKey(voi.filledBallotKey(), true);
                 },
                 function fail(err) {
                     if (err.message === 'Access denied') {
@@ -123,11 +139,10 @@
     vot.View = function () {
 
         var self = {
-            activeViewName: ko.observable('main')
+            activeViewName: ko.observable('voting')
         };
 
         ui.setSubViews(self, {
-            main: function () {return {};},
             voting: vot.VotingView,
             results: vot.ResultsView
         });

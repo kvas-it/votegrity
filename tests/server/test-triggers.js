@@ -41,7 +41,7 @@ describe('Ballot tracking triggers', function () {
     it('should create ACLs for filled ballots', function () {
         return st.write('ballot-5', 'abcd').then(function () {
             var acl = store.data['ballot-5-filled.acl'];
-            acl.should.startWith('5:write-once@');
+            acl.should.startWith('5:read\n5:write-once@');
             var ts = Number(acl.split('@')[1]);
             ts.should.be.approximately(Date.now(), 10);
         });

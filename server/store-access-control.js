@@ -54,6 +54,11 @@ StoreAC.prototype.checkACL = function (key, type, user) {
                 if (ts.getTime() > end) {
                     throw Error('Access denied');
                 }
+            })
+            .catch((err) => {
+                if (err.message !== 'Missing key: ' + key) {
+                    throw err;
+                }
             });
     });
 };
