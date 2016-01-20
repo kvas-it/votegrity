@@ -49,9 +49,9 @@ describe('Store client', function () {
     });
 
     it('should pass the access token', function () {
-        var usersData = '1:TUrDi0FcAiT2i2KmNx/z5tqR3+w6n9:' +
+        var usersData = '1:gapniYowXNxmiYIcrGskCXSemafooW:' +
                         'john@doe.com:John Doe:moderator';
-        var accessToken = 'pmWkWSBCL51Bfkhn79xPuKBKHz//H6';
+        var accessToken = 'pmWkWSBCL51Bfkhn79xPuKBKHzH6Bm';
 
         return store.write('users', usersData)
             .then(function () {

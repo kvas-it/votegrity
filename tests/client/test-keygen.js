@@ -12,7 +12,7 @@ describe('Keygen', function () {
 
     var password = '123456789012345678901234567890';
     var publcInfo =
-        'htoken: xqNr9s59YJg0oMvBqSlGG//SC9cWo7\n\n' +
+        'htoken: xqNr9s59YJg0oMvBqSlGGSC9cWo7Uw\n\n' +
         'public key:\n' +
         'vH6VAH7RdZVwhnVyp4ijBpD1rM8PH8ZPwL3s5c6ecPiMP+Keg4V0W3ub1Ej\n' +
         'mbGcxsN8/FmZNMkl6k434W+pKYtEpd5bM7rme2GQ2lPc3qYGEKzTojZZAc6\n' +

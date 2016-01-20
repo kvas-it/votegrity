@@ -22,7 +22,7 @@ describe('Crypto utils', function () {
     });
 
     it('should calculate hashes', function () {
-        crypto.hash('123').should.be.eql('pmWkWSBCL51Bfkhn79xPuKBKHz//H6');
+        crypto.hash('123').should.be.eql('pmWkWSBCL51Bfkhn79xPuKBKHzH6Bm');
     });
 
     it('should generate random tokens', function () {

@@ -19,7 +19,8 @@
 
     /* SHA256 -> BASE64 -> truncate to 30 */
     crypto.hash = function (plainText) {
-        return cryptico.b16to64(crypto.sha256(plainText)).substr(0, 30);
+        return cryptico.b16to64(crypto.sha256(plainText))
+            .replace(/[\/\+]/g, '').substr(0, 30);
     };
 
     crypto.genToken = function () {
