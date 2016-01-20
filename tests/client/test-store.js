@@ -30,10 +30,10 @@ describe('Store client', function () {
     it('should trigger triggers', function () {
         return store.write('ballot-5', 'abc')
             .then(function () {
-                return store.read('ballots-state');
+                return store.read('ballots-out');
             })
             .then(function (data) {
-                data.should.be.eql('5:abc:distributed');
+                data.should.be.eql('5:abc');
             });
     });
 

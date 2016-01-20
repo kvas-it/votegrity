@@ -9,49 +9,37 @@ var P = require('bluebird');
 var StoreTriggers = require('./store-triggers');
 var tu = require('./text-utils');
 
-var ballotTableFields = ['id', 'ballot', 'state'];
+var ballotsOutFields = ['id', 'token'];
+var ballotsInFields = ['token'];
 
-function setBallotRecord(recs, userId, ballotToken, state) {
-
-    var record = {id: userId};
-    var existing = recs.filter((r) => r.id === userId)[0];
-
-    if (existing) {
-        record = existing;
-    } else {
-        recs.push(record);
-    }
-
-    if (ballotToken) {
-        record.ballot = ballotToken;
-    }
-
-    if (state) {
-        record.state = state;
-    }
-
-    return recs;
-}
-
-function processCSVKeyValue(store, key, func) {
+/*
+ * Read key value from the store, parse it according to the fields,
+ * call the function on parsed value, unparse the result and store it
+ * back into the same key.
+ */
+function process(store, key, fields, func) {
     return store.read(key)
         .catch(() => '')
-        .then((data) => tu.parseCSV(data, ballotTableFields))
+        .then((data) => tu.parseCSV(data, fields))
         .then(func)
-        .then((recs) => tu.unparseCSV(recs, ballotTableFields))
+        .then((recs) => tu.unparseCSV(recs, fields))
         .then((data) => store.write(key, data))
-        .return(undefined);
+        .return();
 }
 
 var ballotDistrTrigger = {
     op: 'write',
     key: /^ballot-\d+$/,
-    after: (store, key, value) => {
+    after: function (store, key, value) {
         var t = key.split('-');
         var userId = t[1];
         return P.all([
-            processCSVKeyValue(store, 'ballots-state',
-                (recs) => setBallotRecord(recs, userId, value, 'distributed')),
+            process(store, 'ballots-out', ballotsOutFields, function (bo) {
+                if (bo.filter((r) => r.token === value).length === 0) {
+                    bo.push({id: userId, token: value});
+                }
+                return bo;
+            }),
             store.write('ballot-' + userId + '-filled.acl',
                 userId + ':read\n' + userId + ':write-once@' + String(Date.now()))
         ]);
@@ -61,17 +49,34 @@ var ballotDistrTrigger = {
 var ballotFillTrigger = {
     op: 'write',
     key: /^ballot-\d+-filled$/,
-    after: (store, key) => {
+    after: function (store, key) {
         var t = key.split('-');
         var userId = t[1];
-        return processCSVKeyValue(store, 'ballots-state',
-            (recs) => setBallotRecord(recs, userId, undefined, 'filled'));
+        return store.read('ballot-' + userId)
+            .then(function (token) {
+                return process(store, 'ballots-in', ballotsInFields,
+                    function (bi) {
+                        if (bi.filter((r) => r.token === token).length === 0) {
+                            bi.push({token: token});
+                        }
+                        return bi;
+                    });
+            });
+    }
+};
+
+var ballotsInTrigger = {
+    op: 'write',
+    key: 'ballots-in',
+    after: function (store) {
+        return store.write('ballots-in.acl', '*:read').return();
     }
 };
 
 var triggers = [
     ballotDistrTrigger,
-    ballotFillTrigger
+    ballotFillTrigger,
+    ballotsInTrigger
 ];
 
 module.exports = function (base) {

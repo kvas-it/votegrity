@@ -157,7 +157,7 @@ describe('Ballot management', function () {
         view.issuanceSwitch.enabled().should.be.eql(false);
         view.votersCount().should.be.eql(4);
         view.ballotsCount().should.be.eql(2);
-        view.distrBallotsCount().should.be.eql(0);
+        view.ballotsOutCount().should.be.eql(0);
         view.remainingVotersCount().should.be.eql(4);
         view.remainingBallotsCount().should.be.eql(2);
         view.ballotsToDistribute().should.be.eql(2);
@@ -182,7 +182,7 @@ describe('Ballot management', function () {
     it('should distribute ballots wisely', function () {
         return storeMock.setMany({
             ballots: mocking.makeBallotsData('', '', 'A\nB\nC'),
-            'ballots-state': '3:B:distributed'
+            'ballots-out': '3:B'
         })
         .then(function () {
             return view.distributeBallots();

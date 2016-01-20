@@ -46,30 +46,33 @@
 
         var self = {};
 
-        self.ballotState = store.getKeyObservable('ballots-state', '');
-
-        self.ballotStates = ko.pureComputed(function () {
-            var data = self.ballotState();
-            return utils.parseData(data, ['id', 'token', 'state']);
+        self.ballotsOutData = store.getKeyObservable('ballots-out', '');
+        self.ballotsOut = ko.pureComputed(function () {
+            var data = self.ballotsOutData();
+            return utils.parseData(data, ['id', 'token']);
         });
+        self.ballotsOutCount = utils.koLength(self.ballotsOut);
 
-        self.distrBallotsCount = ko.pureComputed(function () {
-            return self.ballotStates().length;
+        self.ballotsInData = store.getKeyObservable('ballots-in', '');
+        self.ballotsIn = ko.pureComputed(function () {
+            var data = self.ballotsInData();
+            return utils.parseData(data, ['token']);
         });
+        self.ballotsInCount = utils.koLength(self.ballotsIn);
 
         self.remainingBallots = ko.pureComputed(function () {
-            var distributed = {};
-            self.ballotStates().forEach(function (bs) {
-                distributed[bs.token] = 1;
+            var out = {};
+            self.ballotsOut().forEach(function (bs) {
+                out[bs.token] = 1;
             });
             return bii.ballotTokens().filter(function (token) {
-                return !(token in distributed);
+                return !(token in out);
             });
         });
 
         self.remainingVoters = ko.pureComputed(function () {
             var withBallots = {};
-            self.ballotStates().forEach(function (bs) {
+            self.ballotsOut().forEach(function (bs) {
                 withBallots[bs.id] = 1;
             });
             return users.voterList().filter(function (voter) {
@@ -289,15 +292,15 @@
             issuanceSwitch: mod.IssuanceSwitch(bii),
             votersCount: users.votersCount,
             ballotsCount: bii.ballotsCount,
-            distrBallotsCount: bdi.distrBallotsCount
+            ballotsOutCount: bdi.ballotsOutCount
         };
 
         self.remainingVotersCount = ko.pureComputed(function () {
-            return self.votersCount() - self.distrBallotsCount();
+            return self.votersCount() - self.ballotsOutCount();
         });
 
         self.remainingBallotsCount = ko.pureComputed(function () {
-            return self.ballotsCount() - self.distrBallotsCount();
+            return self.ballotsCount() - self.ballotsOutCount();
         });
 
         self.ballotsToDistribute = ko.pureComputed(function () {
@@ -331,7 +334,7 @@
             }
 
             return promise.then(function () {
-                return store.loadKey('ballots-state', true);
+                return store.loadKey('ballots-out', true);
             });
         };
 
