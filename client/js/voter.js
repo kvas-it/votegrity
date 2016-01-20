@@ -185,6 +185,13 @@
             voters: koAllByRole('voter')
         };
 
+        self.votersListItems = ko.pureComputed(function () {
+            return self.voters().map(function (v) {
+                return '<li>' + v.name +
+                       '&lt;' + v.email + '&gt;' + '</li>';
+            }).join('\n');
+        });
+
         return self;
     };
 
