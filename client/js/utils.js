@@ -8,6 +8,39 @@
 
     var utils = registry.utils = {};
 
+    /* Create a function that extracts object attribute. */
+    utils.attrGetter = function (attrName) {
+        return function (obj) {
+            return obj[attrName];
+        };
+    };
+
+    /* Sort an array with sorting key extractor function. */
+    utils.sortBy = function (array, func) {
+
+        if (typeof(func) === 'string') {
+            func = utils.attrGetter(func);
+        }
+
+        var keysArray = array.map(function (item, index) {
+            return {key: func(item), index: index};
+        });
+
+        keysArray.sort(function (a, b) {
+            if (a.key > b.key) {
+                return 1;
+            }
+            if (a.key < b.key) {
+                return -1;
+            }
+            return 0;
+        });
+
+        return keysArray.map(function (keyItem) {
+            return array[keyItem.index];
+        });
+    };
+
     /* Make a promise that resolves to result. */
     utils.pResolve = function (result) {
         var d = ayepromise.defer();

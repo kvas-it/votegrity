@@ -3,6 +3,14 @@ body {
     font-family: Arial;
 }
 
+h1 {
+    font-size: 160%;
+}
+
+h2 {
+    font-size: 140%;
+}
+
 div {
     box-sizing: border-box;
 }

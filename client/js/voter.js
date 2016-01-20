@@ -145,6 +145,54 @@
 
     };
 
+    vot.ParticipantsView = function () {
+
+        var users = registry.mod.UsersInfo();
+
+        function nameEmail(user) {
+            if (user) {
+                return {name: user.name, email: user.email};
+            } else {
+                return {name: '', email: ''};
+            }
+        }
+
+        function filterByRole(role, users) {
+            return users.filter(function (u) {
+                return u.role === role;
+            });
+        }
+
+        function koOneByRole(role) {
+            return ko.pureComputed(function () {
+                return nameEmail(filterByRole(role, users.userList())[0]);
+            });
+        }
+
+        function koAllByRole(role) {
+            return ko.pureComputed(function () {
+                var recs = filterByRole(role, users.userList()).map(nameEmail);
+                return utils.sortBy(recs, 'name');
+            });
+        }
+
+        var self = {
+            moderator: koOneByRole('moderator'),
+            counter: koOneByRole('counter'),
+            voters: koAllByRole('voter')
+        };
+
+        return self;
+    };
+
+    vot.ProgressView = function () {
+        return {};
+    };
+
+    vot.ResultsView = function () {
+        return {};
+    };
+
     vot.View = function () {
 
         var self = {
@@ -153,11 +201,15 @@
 
         ui.setSubViews(self, {
             voting: vot.VotingView,
+            participants: vot.ParticipantsView,
+            progress: vot.ProgressView,
             results: vot.ResultsView
         });
 
         self.menuItems = ui.makeMenu(self, [
             {name: 'Vote', view: 'voting'},
+            {name: 'Participants', view: 'participants'},
+            {name: 'Progress', view: 'progress'},
             {name: 'View results', view: 'results'}
         ]);
 

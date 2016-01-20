@@ -139,3 +139,44 @@ describe('Voting UI', function () {
     });
 
 });
+
+describe.only('Voting info views', function () {
+
+    'use strict';
+
+    var mocking = window.registry.mocking;
+    var vot = window.registry.vot;
+
+    var users = '1:x:a@b.c:A:moderator\n' +
+                '2:v:v@x.x:V:counter\n' +
+                '5:y:b@c.d:Y:voter\n' +
+                '8:z:c@d.e:C:voter';
+    var storeMock;
+
+    beforeEach(function () {
+        storeMock = mocking.mockStore();
+        mocking.mockCrypto('123');
+        mocking.mock('auth.htoken', 'y'); // Authenticate as 5.
+        mocking.mock('crypto.genToken', function () {
+            return 'abc';
+        });
+        return storeMock.setMany({
+            'key-counter': 'cntkey',
+            users: users,
+            ballots: mocking.makeBallotsData('', 'a\nb', 'A')
+        });
+    });
+
+    afterEach(mocking.unmockAll);
+
+    it('should show all participants', function () {
+        var view = vot.ParticipantsView();
+        view.moderator().should.be.eql({name: 'A', email: 'a@b.c'});
+        view.counter().should.be.eql({name: 'V', email: 'v@x.x'});
+        view.voters().should.be.eql([
+            {name: 'C', email: 'c@d.e'},
+            {name: 'Y', email: 'b@c.d'}
+        ]);
+    });
+
+});

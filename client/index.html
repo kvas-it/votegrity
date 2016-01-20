@@ -249,6 +249,8 @@
 
       <!-- voting view -->
       <div data-bind="with: voting">
+        <h1>Vote</h1>
+
         <p data-bind="visible: state() === 'no ballot'">
           The voting is being prepared. Your ballot is not issued yet.
         </p>
@@ -316,6 +318,37 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- participants view -->
+      <div data-bind="with: participants">
+        <h1>Administrators</h1>
+
+        <ul>
+          <li>
+            <b>Moderator:</b>
+            <span data-bind="with: moderator">
+              <span data-bind="text: name">&nbsp;</span>
+              &lt;<span data-bind="text: email">&nbsp;</span>&gt;
+            </span>
+          </li>
+          <li>
+            <b>Counter:</b>
+            <span data-bind="with: counter">
+              <span data-bind="text: name">&nbsp;</span>
+              &lt;<span data-bind="text: email">&nbsp;</span>&gt;
+            </span>
+          </li>
+        </ul>
+
+        <h1>All voters</h1>
+
+        <ul data-bind="foreach: voters">
+          <li>
+            <span data-bind="text: name">&nbsp;</span>
+            &lt;<span data-bind="text: email">&nbsp;</span>&gt;
+          </li>
+        </ul>
       </div>
 
      </div>
