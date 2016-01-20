@@ -34,6 +34,7 @@ describe('Voting UI', function () {
 
     it('should indicate that the ballot is not distributed', function () {
         view.haveBallot().should.be.eql(false);
+        view.showVoting().should.be.eql(false);
         view.state().should.be.eql('no ballot');
     });
 
@@ -41,6 +42,7 @@ describe('Voting UI', function () {
         return storeMock.set('ballot-5', 'A')
         .then(function () {
             view.haveBallot().should.be.eql(true);
+            view.showVoting().should.be.eql(true);
             view.state().should.be.eql('');
         });
     });
@@ -49,6 +51,7 @@ describe('Voting UI', function () {
         return storeMock.set('ballot-5', 'B')
         .then(function () {
             view.haveBallot().should.be.eql('CHECK FAILED');
+            view.showVoting().should.be.eql(false);
             view.state().should.be.eql('invalid ballot');
         });
     });
@@ -93,7 +96,18 @@ describe('Voting UI', function () {
             return view.submit();
         })
         .then(function () {
+            view.state().should.be.eql('already voted error');
+        });
+    });
+
+    it('should report already voted', function () {
+        return storeMock.setMany({
+            'ballot-5': 'A',
+            'ballot-5-filled': 'filled'
+        })
+        .then(function () {
             view.state().should.be.eql('already voted');
+            view.showVoting().should.be.eql(false);
         });
     });
 

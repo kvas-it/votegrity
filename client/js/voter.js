@@ -83,11 +83,15 @@
 
         self.state = ko.pureComputed(function () {
             if (self.voted()) {
-                return 'voted';
+                if (self.voterToken()) {
+                    return 'voted';
+                } else {
+                    return 'already voted';
+                }
             } else if (self.disconnected()) {
                 return 'disconnected';
             } else if (self.votedError()) {
-                return 'already voted';
+                return 'already voted error';
             } else if (!self.haveBallot()) {
                 return 'no ballot';
             } else if (self.haveBallot() === 'CHECK FAILED') {
@@ -95,6 +99,11 @@
             } else {
                 return '';
             }
+        });
+
+        self.showVoting = ko.pureComputed(function () {
+            var state = self.state();
+            return self.haveBallot() === true && state !== 'already voted';
         });
 
         self.enableOptions = ko.pureComputed(function () {

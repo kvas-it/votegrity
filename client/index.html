@@ -258,7 +258,7 @@
           further information.
         </p>
 
-        <p class="error" data-bind="visible: state() === 'already voted'">
+        <p class="error" data-bind="visible: state() === 'already voted error'">
           Your ballot seems to have been used already.
           Please contact vote administrators for further information.
         </p>
@@ -267,15 +267,18 @@
           Server seems to be down. Please retry later.
         </p>
 
+        <div data-bind="visible: state() === 'already voted'">
+          <p>
+            You have already voted.<br/><br/>
+            Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.
+          </p>
+        </div>
+
         <div data-bind="visible: state() === 'voted'">
-          <p data-bind="visible: voterToken">
+          <p>
             Thank you for your vote.<br/><br/>
             Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.<br/>
             Your voter code is <b data-bind="text: voterToken">&nbsp;</b>.<br/>
-          </p>
-          <p data-bind="visible: !voterToken()">
-            You have already voted.<br/><br/>
-            Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.
           </p>
           <p class="info">
             The ballot code can be used to verify that your ballot has
@@ -286,7 +289,7 @@
           </p>
         </div>
 
-        <div data-bind="visible: haveBallot() === true">
+        <div data-bind="visible: showVoting">
           <p data-bind="text: info"></p>
 
           <div data-bind="foreach: options">

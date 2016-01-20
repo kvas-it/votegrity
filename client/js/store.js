@@ -56,7 +56,7 @@
         return apiCall({method: 'read', key: key})
             .fail(function (err) {
                 if (err.message === 'Missing key: ' + key &&
-                        default_ !== undefined) {
+                        arguments.length > 1) {
                     return default_;
                 } else {
                     throw err;
@@ -82,7 +82,7 @@
 
         self.load = function () {
             self.loading(true);
-            self._promise = store.read(key, '')
+            self._promise = store.read(key, undefined)
                 .then(function (value) {
                     self.value(value);
                     self.loadedValue(value);
