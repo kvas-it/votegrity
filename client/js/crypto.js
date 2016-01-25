@@ -37,6 +37,9 @@
     };
 
     crypto.makeSignature = function (plainText) {
+        if (!crypto.keyPair) {
+            throw Error('Cryptography is not initialised');
+        }
         return cryptico.b16to64(crypto.keyPair.signString(plainText, 'sha256'));
     };
 
@@ -84,6 +87,9 @@
     };
 
     crypto.decrypt = function (cipherText) {
+        if (!crypto.keyPair) {
+            throw Error('Cryptography is not initialised');
+        }
         var result = cryptico.decrypt(cipherText, crypto.keyPair);
         if (result.status !== 'success') {
             throw Error(result.status);

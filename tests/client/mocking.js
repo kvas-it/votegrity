@@ -7,7 +7,6 @@
     'use strict';
 
     var cnst = registry.cnst;
-    var crypto = registry.crypto;
     var utils = registry.utils;
     var store = registry.store;
 
@@ -106,15 +105,33 @@
         };
     };
 
+    function mockSign(text) {
+        return text + '\nsigned';
+    }
+
     /* Replace real crypto with a fake version for testing. */
     mocking.mockCrypto = function (password) {
+
+        var keysInitialised = false;
+
+        function initKeys() {
+            keysInitialised = true;
+            mocking.mock('crypto.publicKey', 'publicKey');
+            mocking.mock('crypto.keyPair', 'keyPair');
+        }
+
+        mocking.mock('auth.initKeys', initKeys);
+        mocking.mock('crypto.initKeys', initKeys);
 
         mocking.mock('crypto.encrypt', function (text, key) {
             return text + '\nencrypted with ' + key;
         });
 
         mocking.mock('crypto.sign', function (text) {
-            return text + '\nsigned';
+            if (!keysInitialised) {
+                throw Error('Cryptography is not initialised');
+            }
+            return mockSign(text);
         });
 
         mocking.mock('crypto.signed2plain', function (text) {
@@ -122,11 +139,6 @@
                 throw Error('Signature verification failed');
             }
             return text.substring(0, text.length - 7);
-        });
-
-        mocking.mock('crypto.initKeys', function () {
-            mocking.mock('crypto.publicKey', 'publicKey');
-            mocking.mock('crypto.keyPair', 'keyPair');
         });
 
         if (password) {
@@ -140,7 +152,7 @@
         var text = descr + cnst.ballotsSeparator +
                    options + cnst.ballotsSeparator +
                    ballots;
-        return crypto.sign(text);
+        return mockSign(text);
     };
 
 })(this.registry);
