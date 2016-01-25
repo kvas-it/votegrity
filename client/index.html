@@ -203,6 +203,15 @@
             <span data-bind="text: token">&nbsp;</span><br/>
           </div>
         </div>
+        <p data-bind="visible: ballotsCollectedFlag">
+          Voting is finished.
+          <span data-bind="text:ballotsCollectedCount">0</span> ballot(s) collected.
+        </p>
+        <p data-bind="visible: !ballotsCollectedFlag()">
+          <button data-bind="click: collectBallots">
+            Finish voting and collect ballots
+          </button>
+        </p>
       </div>
 
      </div>
@@ -282,6 +291,10 @@
         <p class="error" data-bind="visible: state() === 'disconnected'">
           Server seems to be down. Please retry later.
         </p>
+
+        <div data-bind="visible: state() === 'vote finished'">
+          <p>Vote finished.</p>
+        </div>
 
         <div data-bind="visible: state() === 'already voted'">
           <p>
@@ -364,6 +377,10 @@
       <!-- voting progress -->
       <div data-bind="with: progress">
         <h1>Submitted ballots</h1>
+
+        <p data-bind="visible: voteFinished">
+          Vote finished.
+        </p>
 
         <p class="info">
           These are the ballot tokens from submitted ballots. You can

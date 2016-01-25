@@ -329,6 +329,7 @@
             ballotsInCount: bdi.ballotsInCount,
             ballotsIn: bdi.ballotsIn,
             ballotsCollectedFlag: bdi.ballotsCollectedFlag,
+            ballotsCollectedCount: bdi.ballotsCollectedCount,
             ballotsInVisibility: ko.observable(false)
         };
 

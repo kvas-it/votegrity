@@ -65,6 +65,7 @@
 
         var users = registry.mod.UsersInfo();
         var bii = registry.cnt.BallotIssuanceInfo(users);
+        var bdi = registry.mod.BallotDistributionInfo(users, bii);
         var voi = vot.VotingInfo(bii);
 
         var self = {
@@ -82,7 +83,9 @@
         };
 
         self.state = ko.pureComputed(function () {
-            if (self.voted()) {
+            if (bdi.ballotsCollectedFlag()) {
+                return 'vote finished';
+            } else if (self.voted()) {
                 if (self.voterToken()) {
                     return 'voted';
                 } else {
@@ -103,7 +106,9 @@
 
         self.showVoting = ko.pureComputed(function () {
             var state = self.state();
-            return self.haveBallot() === true && state !== 'already voted';
+            return bdi.ballotsCollectedFlag() === false &&
+                self.haveBallot() === true &&
+                state !== 'already voted';
         });
 
         self.enableOptions = ko.pureComputed(function () {
@@ -201,7 +206,10 @@
         var bii = registry.cnt.BallotIssuanceInfo(users);
         var bdi = registry.mod.BallotDistributionInfo(users, bii);
 
-        return {usedBallots: bdi.ballotsIn};
+        return {
+            usedBallots: bdi.ballotsIn,
+            voteFinished: bdi.ballotsCollectedFlag
+        };
     };
 
     vot.ResultsView = function () {
