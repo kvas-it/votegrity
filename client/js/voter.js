@@ -225,7 +225,7 @@
             {name: 'Vote', view: 'voting'},
             {name: 'Participants', view: 'participants'},
             {name: 'Progress', view: 'progress'},
-            {name: 'View results', view: 'results'}
+            {name: 'Results', view: 'results'}
         ]);
 
         return self;

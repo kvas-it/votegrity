@@ -189,6 +189,20 @@
           <span data-bind="text: remainingBallotsCount">0</span>
           <button data-bind="visible: canDistribute, click: distributeBallots">distribute</button>
         </p>
+        <p>
+          Ballots submitted:
+          <span data-bind="text: ballotsInCount">0</span>
+          <button data-bind="click: toggleBallotsIn,
+            visible: !ballotsInVisibility()">show codes</button>
+          <button data-bind="click: toggleBallotsIn,
+            visible: ballotsInVisibility">hide codes</button>
+        </p>
+        <div data-bind="visible: ballotsInVisibility">
+          Submitted ballots:
+          <div id="mod-ballots-in" data-bind="foreach: ballotsIn">
+            <span data-bind="text: token">&nbsp;</span><br/>
+          </div>
+        </div>
       </div>
 
      </div>

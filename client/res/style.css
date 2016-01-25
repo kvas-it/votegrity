@@ -70,7 +70,9 @@ a.menu-item:hover {
     margin-top: 40px;
 }
 
-#mod-voter-list, #mod-ballot-distr {
+#mod-voter-list, #mod-ballot-distr, #mod-ballots-in {
+    padding: 4px;
+    border: 1px solid grey;
     height: 400px;
     width: 600px;
     overflow: auto;

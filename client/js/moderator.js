@@ -7,8 +7,10 @@
     'use strict';
 
     var utils = registry.utils;
+    var cnst = registry.cnst;
     var crypto = registry.crypto;
     var ui = registry.ui;
+    var auth = registry.auth;
     var store = registry.store;
 
     var mod = registry.mod = {};
@@ -292,7 +294,10 @@
             issuanceSwitch: mod.IssuanceSwitch(bii),
             votersCount: users.votersCount,
             ballotsCount: bii.ballotsCount,
-            ballotsOutCount: bdi.ballotsOutCount
+            ballotsOutCount: bdi.ballotsOutCount,
+            ballotsInCount: bdi.ballotsInCount,
+            ballotsIn: bdi.ballotsIn,
+            ballotsInVisibility: ko.observable(false)
         };
 
         self.remainingVotersCount = ko.pureComputed(function () {
@@ -336,6 +341,35 @@
             return promise.then(function () {
                 return store.loadKey('ballots-out', true);
             });
+        };
+
+        self.toggleBallotsIn = function () {
+            self.ballotsInVisibility(!self.ballotsInVisibility());
+        };
+
+        function ballotsInUserIds() {
+            var boByToken = utils.indexBy(bdi.ballotsOut(), 'token');
+            return bdi.ballotsIn().map(function (b) {
+                return boByToken[b.token].id;
+            });
+        }
+
+        self.collectBallots = function () {
+            auth.initKeys();
+            return utils.pAll(ballotsInUserIds().map(function (id) {
+                    return store.read('ballot-' + id + '-filled');
+                }))
+                .then(utils.shuffle)
+                .then(function (fbs) {
+                    return fbs.join(cnst.ballotsSeparator);
+                })
+                .then(crypto.sign)
+                .then(function (collected) {
+                    return utils.pAll([
+                        store.write('ballots-collected', collected),
+                        store.write('ballots-collected.acl', '*:read')
+                    ]);
+                });
         };
 
         return self;

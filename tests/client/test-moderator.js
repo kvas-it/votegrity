@@ -130,6 +130,8 @@ describe('Ballot management', function () {
 
     var mocking = window.registry.mocking;
     var mod = window.registry.mod;
+    var cnst = window.registry.cnst;
+    var crypto = window.registry.crypto;
 
     var users = '1::::moderator\n' +
                 '2::::voter\n' +
@@ -140,8 +142,8 @@ describe('Ballot management', function () {
     var view;
 
     beforeEach(function () {
-        mocking.mockCrypto();
         storeMock = mocking.mockStore();
+        mocking.mockCrypto('123');
         return storeMock.setMany({
             users: users,
             ballots: mocking.makeBallotsData('', '', 'A\nB')
@@ -193,4 +195,24 @@ describe('Ballot management', function () {
         });
     });
 
+    it('should collect ballots', function () {
+        return storeMock.setMany({
+            ballots: mocking.makeBallotsData('', '', 'A\nB\nC'),
+            'ballots-out': '2:A\n3:B\n4:C',
+            'ballots-in': 'A\nB',
+            'ballot-2-filled': 'A filled',
+            'ballot-3-filled': 'B filled'
+        })
+        .then(function () {
+            return view.collectBallots();
+        })
+        .then(function () {
+            var bcS = storeMock.get('ballots-collected');
+            var bc = crypto.signed2plain(bcS);
+            var ballots = bc.split(cnst.ballotsSeparator);
+            ballots.sort();
+            ballots.should.be.eql(['A filled', 'B filled']);
+            storeMock.get('ballots-collected.acl').should.be.eql('*:read');
+        });
+    });
 });

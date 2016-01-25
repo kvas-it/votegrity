@@ -41,6 +41,34 @@
         });
     };
 
+    /* Convert array to a mapping. */
+    utils.indexBy = function (array, func) {
+
+        if (typeof(func) === 'string') {
+            func = utils.attrGetter(func);
+        }
+
+        var ret = {};
+
+        array.forEach(function (item) {
+            ret[func(item)] = item;
+        });
+
+        return ret;
+    };
+
+    /* Randomly rearrange a sequence (Fisher-Yates). */
+    utils.shuffle = function (array) {
+        array = Array.apply(null, array);
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = array[i];
+            array[i] = array[j];
+            array[j] = t;
+        }
+        return array;
+    };
+
     /* Make a promise that resolves to result. */
     utils.pResolve = function (result) {
         var d = ayepromise.defer();
