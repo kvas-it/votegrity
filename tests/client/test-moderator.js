@@ -132,6 +132,7 @@ describe('Ballot management', function () {
     var mod = window.registry.mod;
     var cnst = window.registry.cnst;
     var crypto = window.registry.crypto;
+    var store = window.registry.store;
 
     var users = '1::::moderator\n' +
                 '2::::voter\n' +
@@ -196,6 +197,7 @@ describe('Ballot management', function () {
     });
 
     it('should collect ballots', function () {
+        view.ballotsCollectedFlag().should.be.eql(false);
         return storeMock.setMany({
             ballots: mocking.makeBallotsData('', '', 'A\nB\nC'),
             'ballots-out': '2:A\n3:B\n4:C',
@@ -213,6 +215,44 @@ describe('Ballot management', function () {
             ballots.sort();
             ballots.should.be.eql(['A filled', 'B filled']);
             storeMock.get('ballots-collected.acl').should.be.eql('*:read');
+            view.ballotsCollectedFlag().should.be.eql(true);
         });
     });
+
+    function fakeCollectedBallots(ballots, tail) {
+        crypto.initKeys();
+        var bcData = crypto.sign(ballots.join(cnst.ballotsSeparator));
+        if (tail) {
+            bcData += tail;
+        }
+        return storeMock.set('ballots-collected', bcData)
+            .then(function () {
+                return store.loadKey('ballots-collected', true);
+            });
+    }
+
+    function makeBDI() {
+        var users = mod.UsersInfo();
+        var bii = window.registry.cnt.BallotIssuanceInfo(users);
+        return mod.BallotDistributionInfo(users, bii);
+    }
+
+    it('should check and unpack collected ballots', function () {
+        var bdi = makeBDI();
+        return fakeCollectedBallots(['AAA', 'BBB']).then(function () {
+            bdi.ballotsCollected().should.be.eql(['AAA', 'BBB']);
+            bdi.ballotsCollectedFlag().should.be.eql(true);
+            bdi.ballotsCollectedCount().should.be.eql(2);
+        });
+    });
+
+    it('should detect fake collected ballots', function () {
+        var bdi = makeBDI();
+        return fakeCollectedBallots(['AAA'], 'boo').then(function () {
+            (bdi.ballotsCollected() === undefined).should.be.eql(true);
+            bdi.ballotsCollectedFlag().should.be.eql(false);
+            (bdi.ballotsCollectedCount() === undefined).should.be.eql(true);
+        });
+    });
+
 });

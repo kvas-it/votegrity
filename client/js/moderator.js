@@ -82,6 +82,37 @@
             });
         });
 
+        self.ballotsCollectedData = store.getKeyObservable('ballots-collected', '');
+        self.ballotsCollectedText = ko.pureComputed(function () {
+            var data = self.ballotsCollectedData();
+            var modPK = usersInfo.moderatorPubKey();
+            try {
+                return data ? crypto.signed2plain(data, modPK) : '';
+            } catch (err) {
+                return 'CHECK FAILED';
+            }
+        });
+
+        self.ballotsCollected = ko.pureComputed(function () {
+            var bct = self.ballotsCollectedText();
+            if (!bct || bct === 'CHECK FAILED') {
+                return undefined;
+            } else {
+                return bct.split(cnst.ballotsSeparator);
+            }
+        });
+
+        self.ballotsCollectedFlag = ko.pureComputed(function () {
+            return self.ballotsCollected() !== undefined;
+        });
+
+        self.ballotsCollectedCount = ko.pureComputed(function () {
+            var bc = self.ballotsCollected();
+            if (bc) {
+                return bc.length;
+            }
+        });
+
         return self;
     };
 
@@ -297,6 +328,7 @@
             ballotsOutCount: bdi.ballotsOutCount,
             ballotsInCount: bdi.ballotsInCount,
             ballotsIn: bdi.ballotsIn,
+            ballotsCollectedFlag: bdi.ballotsCollectedFlag,
             ballotsInVisibility: ko.observable(false)
         };
 
@@ -369,6 +401,9 @@
                         store.write('ballots-collected', collected),
                         store.write('ballots-collected.acl', '*:read')
                     ]);
+                })
+                .then(function () {
+                    return store.loadKey('ballots-collected', true);
                 });
         };
 
