@@ -274,7 +274,31 @@
             <span data-bind="text: ballotsCollectedCount">0</span>
             ballot(s) collected.
           </p>
-          <button>Calculate results</button>
+          <button data-bind="visible: canCount, click: count">
+            Calculate results
+          </button>
+        </div>
+
+        <div data-bind="visible: resultsAvaliable">
+
+          <h2>Totals</h2>
+
+          <ul data-bind="foreach: totals">
+            <li>
+              <span data-bind="text: option">&nbsp;</span>:
+              <span data-bind="text: votesCount">0</span>
+            </li>
+          </ul>
+
+          <h2>Votes</h2>
+
+          <ul data-bind="foreach: votes">
+            <li>
+              <span data-bind="text: vote">&nbsp;</span>
+              (<span data-bind="text: voterToken">&nbsp;</span>)
+            </li>
+          </ul>
+
         </div>
       </div>
      </div>

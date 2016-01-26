@@ -223,6 +223,12 @@
             votes: res.votes
         };
 
+        self.canCount = ko.pureComputed(function () {
+            return self.voteFinished() &&
+                    !self.resultsAvaliable() &&
+                    bii.votingOptions() !== [];
+        });
+
         self.count = function () {
             auth.initKeys();
             var filledBallots = bdi.ballotsCollected();

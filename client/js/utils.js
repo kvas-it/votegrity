@@ -201,7 +201,7 @@
 
     /* Extract votes from filled ballots.
      *
-     * NOTE: Cryptography needs to be initialised before this will work.
+     * NOTE: Cryptography needs to be initialised before calling this function.
      */
     utils.unpackBallots = function (ballots) {
         return ballots.map(function (ballot) {
