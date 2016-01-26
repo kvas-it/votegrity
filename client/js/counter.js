@@ -89,10 +89,14 @@
 
     cnt.BallotIssuanceView = function () {
 
-        var self = {unlocked: ko.observable(false)};
-
         var users = registry.mod.UsersInfo();
         var bii = cnt.BallotIssuanceInfo(users);
+        var bdi = registry.mod.BallotDistributionInfo(users, bii);
+
+        var self = {
+            unlocked: ko.observable(false),
+            voteFinished: bdi.ballotsCollectedFlag
+        };
 
         self.votersCount = users.votersCount;
         self.ballotsCount = bii.ballotsCount;
@@ -103,7 +107,9 @@
         });
 
         self.status = ko.computed(function () {
-            if (self.ballotsError()) {
+            if (self.voteFinished()) {
+                return 'vote finished';
+            } else if (self.ballotsError()) {
                 return 'signature check error';
             } else {
                 return self.issuanceEnabled() ? 'enabled' : 'disabled';
@@ -117,7 +123,8 @@
         self.canIssue = ko.computed(function () {
             return !self.ballotsError() &&
                     self.issuanceEnabled() &&
-                    self.toIssue() > 0;
+                    self.toIssue() > 0 &&
+                    !self.voteFinished();
         });
 
         self.unlock = function () {
