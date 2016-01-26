@@ -187,7 +187,9 @@
         <p>
           Ballots to distribute:
           <span data-bind="text: remainingBallotsCount">0</span>
-          <button data-bind="visible: canDistribute, click: distributeBallots">distribute</button>
+          <button data-bind="visible: canDistribute, click: distributeBallots">
+            distribute
+          </button>
         </p>
         <p>
           Ballots submitted:
@@ -212,6 +214,37 @@
             Finish voting and collect ballots
           </button>
         </p>
+      </div>
+
+      <!-- vote results -->
+      <div data-bind="with: results">
+        <h1>Vote results</h1>
+
+        <p data-bind="visible: !resultsAvaliable()">
+          Results are not available yet.
+        </p>
+
+        <div data-bind="visible: resultsAvaliable">
+
+          <h2>Totals</h2>
+
+          <ul data-bind="foreach: totals">
+            <li>
+              <span data-bind="text: option">&nbsp;</span>:
+              <span data-bind="text: votesCount">0</span>
+            </li>
+          </ul>
+
+          <h2>Votes</h2>
+
+          <ul data-bind="foreach: votes">
+            <li>
+              <span data-bind="text: vote">&nbsp;</span>
+              (<span data-bind="text: voterToken">&nbsp;</span>)
+            </li>
+          </ul>
+
+        </div>
       </div>
 
      </div>
@@ -331,6 +364,9 @@
 
         <div data-bind="visible: state() === 'vote finished'">
           <p>Vote finished.</p>
+          <p>
+            Your ballot code is <b data-bind="text: ballotToken">&nbsp;</b>.
+          </p>
         </div>
 
         <div data-bind="visible: state() === 'already voted'">
@@ -411,7 +447,7 @@
         </ul>
       </div>
 
-      <!-- voting progress -->
+      <!-- vote progress -->
       <div data-bind="with: progress">
         <h1>Submitted ballots</h1>
 
@@ -420,13 +456,49 @@
         </p>
 
         <p class="info">
-          These are the ballot tokens from submitted ballots. You can
+          These are the ballot codes from submitted ballots. You can
           search the page with Ctrl+F to find yours.
         </p>
 
         <ul data-bind="foreach: usedBallots">
           <li data-bind="text: token">&nbsp;</li>
         </ul>
+      </div>
+
+      <!-- vote results -->
+      <div data-bind="with: results">
+        <h1>Vote results</h1>
+
+        <p data-bind="visible: !resultsAvaliable()">
+          Results are not available yet.
+        </p>
+
+        <div data-bind="visible: resultsAvaliable">
+
+          <h2>Totals</h2>
+
+          <ul data-bind="foreach: totals">
+            <li>
+              <span data-bind="text: option">&nbsp;</span>:
+              <span data-bind="text: votesCount">0</span>
+            </li>
+          </ul>
+
+          <h2>Votes</h2>
+
+          <p class="info">
+            Look for your voter code to check your vote.<br/>
+            Hint: You can use Ctrl+F in the browser find it.
+          </p>
+
+          <ul data-bind="foreach: votes">
+            <li>
+              <span data-bind="text: vote">&nbsp;</span>
+              (<span data-bind="text: voterToken">&nbsp;</span>)
+            </li>
+          </ul>
+
+        </div>
       </div>
 
      </div>

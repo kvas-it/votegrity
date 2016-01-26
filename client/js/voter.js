@@ -213,7 +213,15 @@
     };
 
     vot.ResultsView = function () {
-        return {};
+
+        var users = registry.mod.UsersInfo();
+        var res = registry.cnt.ResultsInfo(users);
+
+        return {
+            resultsAvaliable: res.resultsFlag,
+            totals: res.totals,
+            votes: res.votes
+        };
     };
 
     vot.View = function () {

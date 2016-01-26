@@ -420,14 +420,16 @@
             keys: mod.KeyManagementView,
             voters: mod.VotersView,
             info: mod.VotingInfoView,
-            ballots: mod.BallotsView
+            ballots: mod.BallotsView,
+            results: registry.vot.ResultsView
         });
 
         self.menuItems = ui.makeMenu(self, [
             {name: 'Key management', view: 'keys'},
             {name: 'Voter list', view: 'voters'},
             {name: 'Voting configuration', view: 'info'},
-            {name: 'Ballot management', view: 'ballots'}
+            {name: 'Ballot management', view: 'ballots'},
+            {name: 'Results', view: 'results'}
         ]);
 
         return self;
