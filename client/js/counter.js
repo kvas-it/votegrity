@@ -164,10 +164,77 @@
         return self;
     };
 
+    cnt.ResultsInfo = function (users) {
+
+        var self = {};
+
+        self.resultsData = store.getKeyObservable('results', '');
+        self.resultsText = ko.pureComputed(function () {
+            var data = self.resultsData();
+            var cntPK = users.counterPubKey();
+            try {
+                return data ? crypto.signed2plain(data, cntPK) : '';
+            } catch (err) {
+                return 'CHECK FAILED';
+            }
+        });
+
+        self.resultsFlag = ko.pureComputed(function () {
+            var text = self.resultsText();
+            return text && text !== 'CHECK FAILED' ? true : false;
+        });
+
+        self.resultsParts = ko.pureComputed(function () {
+            if (self.resultsFlag()) {
+                return self.resultsText().split(cnst.ballotsSeparator);
+            }
+        });
+
+        self.totals = ko.pureComputed(function () {
+            if (self.resultsFlag()) {
+                return utils.parseData(self.resultsParts()[0],
+                    ['option', 'votesCount']);
+            }
+        });
+
+        self.votes = ko.pureComputed(function () {
+            if (self.resultsFlag()) {
+                return utils.parseData(self.resultsParts()[1],
+                    ['voterToken', 'vote']);
+            }
+        });
+
+        return self;
+    };
+
     /* Counting view. */
     cnt.CountingView = function () {
 
-        var self = {};
+        var users = registry.mod.UsersInfo();
+        var bii = cnt.BallotIssuanceInfo(users);
+        var bdi = registry.mod.BallotDistributionInfo(users, bii);
+        var res = cnt.ResultsInfo(users);
+
+        var self = {
+            ballotsCollectedCount: bdi.ballotsCollectedCount,
+            voteFinished: bdi.ballotsCollectedFlag,
+            resultsAvaliable: res.resultsFlag,
+            totals: res.totals,
+            votes: res.votes
+        };
+
+        self.count = function () {
+            auth.initKeys();
+            var filledBallots = bdi.ballotsCollected();
+            var options = bii.votingOptions();
+            var votes = utils.unpackBallots(filledBallots);
+            var results = utils.calculateResults(options, votes);
+            var data = utils.makeResults(votes, results);
+            return store.write('results', data)
+                .then(function () {
+                    store.loadKey('results', true);
+                });
+        };
 
         return self;
     };

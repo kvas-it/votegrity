@@ -6,6 +6,7 @@
 
     'use strict';
 
+    var cnst = registry.cnst;
     var utils = registry.utils = {};
 
     /* Create a function that extracts object attribute. */
@@ -157,6 +158,15 @@
         });
     };
 
+    /* The opposite of parseData. */
+    utils.unparseData = function (items, fields) {
+        return items.map(function (item) {
+            return fields.map(function (field) {
+                return item[field];
+            }).join(':');
+        }).join('\n');
+    };
+
     /* Parse user list (). */
     utils.parseUserList = function (data) {
         return utils.parseData(data, ['id', 'htoken', 'email', 'name', 'role']);
@@ -176,6 +186,56 @@
     /* Merge the wrapped data back into one line. */
     utils.unwrapData = function (wrapped) {
         return wrapped.replace(/\n/g, '');
+    };
+
+    /* Form filled ballot and encrypt it with counter public key. */
+    utils.fillBallot = function (ballotToken, voterToken, vote, counterPK) {
+        var voteText = [ballotToken, voterToken, vote].join('\n');
+        return registry.crypto.encrypt(voteText, counterPK);
+    };
+
+    /* Join and sign filled ballots. */
+    utils.collectBallots = function (filledBallots) {
+        return registry.crypto.sign(filledBallots.join(cnst.ballotsSeparator));
+    };
+
+    /* Extract votes from filled ballots.
+     *
+     * NOTE: Cryptography needs to be initialised before this will work.
+     */
+    utils.unpackBallots = function (ballots) {
+        return ballots.map(function (ballot) {
+            var lines = registry.crypto.decrypt(ballot).split('\n');
+            return {voterToken: lines[1], vote: lines[2]};
+        });
+    };
+
+    /* Calculate vote results from votes and options. */
+    utils.calculateResults = function (options, votes) {
+        var cnt = {};
+        options.forEach(function (opt) {
+            cnt[opt] = 0;
+        });
+        votes.forEach(function (vote) {
+            if (vote.vote in cnt) {
+                cnt[vote.vote] += 1;
+            }
+        });
+        var res = options.map(function (opt) {
+            return {
+                option: opt,
+                votesCount: cnt[opt]
+            };
+        });
+        return utils.sortBy(res, function (i) {return -i.votesCount;});
+    };
+
+    /* Create results bundle. */
+    utils.makeResults = function (votes, results) {
+        var resultsData = utils.unparseData(results, ['option', 'votesCount']);
+        var votesData = utils.unparseData(votes, ['voterToken', 'vote']);
+        var all = [resultsData, votesData].join(cnst.ballotsSeparator);
+        return registry.crypto.sign(all);
     };
 
     /* Derive computed from observable by taking its attribute. */

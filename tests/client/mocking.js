@@ -112,7 +112,7 @@
     /* Replace real crypto with a fake version for testing. */
     mocking.mockCrypto = function (password) {
 
-        var keysInitialised = false;
+        var keysInitialised = password ? true : false;
 
         function initKeys() {
             keysInitialised = true;
@@ -125,6 +125,15 @@
 
         mocking.mock('crypto.encrypt', function (text, key) {
             return text + '\nencrypted with ' + key;
+        });
+
+        mocking.mock('crypto.decrypt', function (text) {
+            var t = '\nencrypted with ' + password;
+            if (text.substr(text.length - t.length) === t) {
+                return text.substr(0, text.length - t.length);
+            } else {
+                throw Error('Decryption failed');
+            }
         });
 
         mocking.mock('crypto.sign', function (text) {

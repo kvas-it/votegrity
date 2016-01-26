@@ -393,14 +393,12 @@
                     return store.read('ballot-' + id + '-filled');
                 }))
                 .then(utils.shuffle)
-                .then(function (fbs) {
-                    return fbs.join(cnst.ballotsSeparator);
-                })
-                .then(crypto.sign)
+                .then(utils.collectBallots)
                 .then(function (collected) {
                     return utils.pAll([
                         store.write('ballots-collected', collected),
-                        store.write('ballots-collected.acl', '*:read')
+                        store.write('ballots-collected.acl', '*:read'),
+                        store.write('results.acl', '*:read\ncounter:write')
                     ]);
                 })
                 .then(function () {

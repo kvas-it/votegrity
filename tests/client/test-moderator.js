@@ -215,6 +215,7 @@ describe('Ballot management', function () {
             ballots.sort();
             ballots.should.be.eql(['A filled', 'B filled']);
             storeMock.get('ballots-collected.acl').should.be.eql('*:read');
+            storeMock.get('results.acl').should.be.eql('*:read\ncounter:write');
             view.ballotsCollectedFlag().should.be.eql(true);
         });
     });

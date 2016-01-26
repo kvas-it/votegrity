@@ -127,12 +127,12 @@
 
             self.voterToken(crypto.genToken());
 
-            var voteText = [
-                voi.ballotToken(),
-                self.voterToken(),
-                self.vote()
-            ].join('\n');
-            var encrText = crypto.encrypt(voteText, users.counterPubKey());
+            var encrText = utils.fillBallot(
+                    voi.ballotToken(),
+                    self.voterToken(),
+                    self.vote(),
+                    users.counterPubKey());
+
             return store.write(voi.filledBallotKey(), encrText)
                 .then(function () {
                     return utils.pAll([

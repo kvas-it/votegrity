@@ -263,6 +263,19 @@
       <!-- counting -->
       <div data-bind="with: counting">
         <h1>Counting and publishing results</h1>
+
+        <p data-bind="visible: !voteFinished()" class="info">
+          This view becomes available after the vote is finished.
+        </p>
+
+        <div data-bind="visible: voteFinished">
+          <p>
+            The vote is finshed with
+            <span data-bind="text: ballotsCollectedCount">0</span>
+            ballot(s) collected.
+          </p>
+          <button>Calculate results</button>
+        </div>
       </div>
      </div>
     </div>
